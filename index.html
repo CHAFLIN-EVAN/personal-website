@@ -497,20 +497,10 @@
       <!-- Resume Admin -->
       <div class="tab-content hidden" id="tab-resume-admin">
         <h3 class="font-semibold text-white mb-4">简历管理</h3>
-        <div class="file-drop border-2 border-dashed border-white/10 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500/50" onclick="document.getElementById('resume-input').click()">
-          <i class="fa-solid fa-cloud-arrow-up text-white/20 text-3xl"></i>
-          <p class="text-white/40 mt-2 text-sm">点击上传简历 (PDF)</p>
-          <input type="file" id="resume-input" accept=".pdf,application/pdf" class="hidden" onchange="handleResumeUpload(event)">
-        </div>
-        <div id="admin-resume-current" class="hidden mt-4">
-          <div class="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg">
-            <i class="fa-solid fa-file-pdf text-indigo-400 text-xl"></i>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-white/80 truncate" id="admin-resume-name"></p>
-              <p class="text-xs text-white/40" id="admin-resume-size"></p>
-            </div>
-            <button onclick="deleteResume()" class="text-red-400 hover:text-red-300 transition"><i class="fa-solid fa-trash-can"></i></button>
-          </div>
+        <div class="glass rounded-xl p-6 text-center">
+          <i class="fa-solid fa-circle-check text-emerald-400 text-3xl mb-2"></i>
+          <p class="text-white/60 text-sm">简历已内嵌在网页中，所有访客可直接浏览。</p>
+          <p class="text-white/30 text-xs mt-2">如需修改内容，请直接编辑 index.html</p>
         </div>
       </div>
 
