@@ -294,18 +294,44 @@
       preload(next + dir);
     }
 
+    const loadingOverlay = document.getElementById('loading-overlay');
+    let loadTimeout;
+
+    function showLoading() {
+      clearTimeout(loadTimeout);
+      loadTimeout = setTimeout(() => {
+        loadingOverlay.classList.remove('hidden');
+      }, 200);
+    }
+
+    function hideLoading() {
+      clearTimeout(loadTimeout);
+      loadingOverlay.classList.add('hidden');
+    }
+
     function goTo(n) {
       current = n;
       resetZoom();
+      showLoading();
       img.classList.remove('fade-in');
       void img.offsetWidth;
       img.src = `portfolio-images/${n + 1}.webp`;
-      img.classList.add('fade-in');
       document.getElementById('page-indicator').textContent = `${n + 1} / ${TOTAL}`;
       updateThumbs();
       preload(n - 1);
       preload(n + 1);
     }
+
+    img.addEventListener('load', () => {
+      hideLoading();
+      img.classList.add('fade-in');
+    });
+
+    img.addEventListener('error', () => {
+      hideLoading();
+      loadingOverlay.innerHTML = '<p class=\"loading-text text-red-400 text-sm\">加载失败，请重试</p>';
+      loadingOverlay.classList.remove('hidden');
+    });
 
     function updateThumbs() {
       document.querySelectorAll('.thumb').forEach((t, i) => {
