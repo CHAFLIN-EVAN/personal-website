@@ -156,6 +156,18 @@
       height: clamp(100px, 16vw, 160px);
       box-shadow: 0 0 30px rgba(57, 255, 20, 0.4), 0 0 60px rgba(57, 255, 20, 0.2);
     }
+    .hero-avatar-ring {
+      width: calc(clamp(100px, 16vw, 160px) + 16px);
+      height: calc(clamp(100px, 16vw, 160px) + 16px);
+      padding: 8px;
+      background: conic-gradient(from 0deg, #39ff14, #00ff88, #0ff, #7fff00, #39ff14);
+      animation: ringSpin 3s linear infinite;
+      box-shadow: 0 0 30px rgba(57, 255, 20, 0.4), 0 0 70px rgba(57, 255, 20, 0.2);
+    }
+    @keyframes ringSpin {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
 
     .timeline-dot {
       width: 16px; height: 16px;
