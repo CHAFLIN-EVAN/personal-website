@@ -966,16 +966,7 @@
     }
 
     function handleResumeUpload(e) {
-      const file = e.target.files[0];
-      if (!file || file.type !== 'application/pdf') { toast('请上传 PDF 文件', 'error'); return; }
-      if (file.size > 20*1024*1024) { toast('PDF 不能超过 20MB', 'error'); return; }
-      const r = new FileReader();
-      r.onload = function(ev) {
-        const data = getData();
-        data.resume = { name: file.name, data: ev.target.result, size: file.size };
-        saveData(data); renderAll(); toast('简历已上传');
-      };
-      r.readAsDataURL(file);
+      toast('简历已内嵌到页面中，如需修改请直接编辑 index.html', 'info');
     }
 
     function saveProfile() {
