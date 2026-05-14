@@ -1164,9 +1164,8 @@
         });
       }
 
-      const arc = document.getElementById('admin-resume-current');
-      if (d.resume) { arc.classList.remove('hidden'); document.getElementById('admin-resume-name').textContent = d.resume.name; document.getElementById('admin-resume-size').textContent = formatSize(d.resume.size); }
-      else { arc.classList.add('hidden'); }
+      // Resume admin — 简历已改为静态 HTML，管理面板不再管理
+
 
       document.getElementById('edit-name').value = d.name || '';
       document.getElementById('edit-title').value = d.title || '';
