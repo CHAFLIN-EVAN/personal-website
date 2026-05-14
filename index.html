@@ -1077,9 +1077,7 @@
       saveData(data); renderAll(); toast('已删除', 'info');
     }
     function deleteResume() {
-      if (!confirm('确定删除简历？')) return;
-      const data = getData();
-      data.resume = null; saveData(data); renderAll(); toast('已删除', 'info');
+      toast('简历已内嵌到页面中，如需修改请直接编辑 index.html', 'info');
     }
 
     function renderAll() {
