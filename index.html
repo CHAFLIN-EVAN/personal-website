@@ -1132,15 +1132,8 @@
         });
       }
 
-      // Resume
-      const rc = document.getElementById('resume-card');
-      const re = document.getElementById('resume-empty');
-      if (d.resume) {
-        rc.classList.remove('hidden'); re.classList.add('hidden');
-        document.getElementById('resume-name').textContent = d.resume.name;
-        document.getElementById('resume-size').textContent = formatSize(d.resume.size);
-        document.getElementById('resume-download').href = d.resume.data;
-      } else { rc.classList.add('hidden'); re.classList.remove('hidden'); }
+      // Resume — 已改为静态 HTML 内嵌简历，无需动态渲染
+
 
       // Admin lists
       const ael = document.getElementById('admin-education-list');
