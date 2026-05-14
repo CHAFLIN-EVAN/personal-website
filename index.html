@@ -1039,7 +1039,7 @@
     function getData() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { const d = JSON.parse(raw); const def = defaultData(); for (const k in def) if (!(k in d)) d[k] = def[k]; if (!d._v || d._v < 2) { d.avatar = def.avatar; d.name = def.name; d.title = def.title; d.bio = def.bio; d._v = 2; saveData(d); } return d; }
+        if (raw) { const d = JSON.parse(raw); const def = defaultData(); for (const k in def) if (!(k in d)) d[k] = def[k]; if (!d._v || d._v < 3) { d.avatar = def.avatar; d.name = def.name; d.title = def.title; d.bio = def.bio; d._v = 3; saveData(d); } return d; }
       } catch(e) {}
       return defaultData();
     }
