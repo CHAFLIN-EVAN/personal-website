@@ -1110,20 +1110,7 @@
       // Resume — 已改为静态 HTML 内嵌简历，无需动态渲染
 
 
-      // Admin lists
-      const ael = document.getElementById('admin-education-list');
-      ael.innerHTML = '';
-      const aee = document.getElementById('admin-edu-empty');
-      if (d.education.length === 0) { aee.classList.remove('hidden'); }
-      else {
-        aee.classList.add('hidden');
-        d.education.forEach(edu => {
-          const div = document.createElement('div');
-          div.className = 'flex items-center gap-3 p-3 bg-zinc-800 rounded-lg';
-          div.innerHTML = `<div class="flex-1 min-w-0"><p class="font-medium text-sm text-white/80">${edu.school}</p><p class="text-xs text-white/40">${edu.degree} · ${edu.year}</p></div><button onclick="showEduModal('${edu.id}')" class="text-indigo-400 hover:text-indigo-300 transition text-sm"><i class="fa-solid fa-pen"></i></button><button onclick="deleteEducation('${edu.id}')" class="text-red-400 hover:text-red-300 transition text-sm"><i class="fa-solid fa-trash-can"></i></button>`;
-          ael.appendChild(div);
-        });
-      }
+      // Admin edu list — 教育经历板块已移除
 
       const apl = document.getElementById('admin-portfolio-list');
       apl.innerHTML = '';
