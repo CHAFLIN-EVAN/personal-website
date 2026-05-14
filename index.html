@@ -1199,20 +1199,8 @@
 
       // Education 板块已移除
 
-      // Portfolio
-      const pg = document.getElementById('portfolio-grid');
-      document.querySelectorAll('.pf-card').forEach(e => e.remove());
-      const pe = document.getElementById('portfolio-empty');
-      if (d.portfolio.length === 0) { pe.classList.remove('hidden'); }
-      else {
-        pe.classList.add('hidden');
-        d.portfolio.forEach(pf => {
-          const div = document.createElement('div');
-          div.className = 'pf-card glass glass-hover rounded-xl overflow-hidden';
-          div.innerHTML = `<div class="pf-img">${pf.image ? `<img src="${pf.image}" alt="${pf.title}" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10\\'></div>'">` : `<div class="w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10"></div>`}</div><div class="p-4"><div class="flex items-center gap-2 mb-1 flex-wrap"><h3 class="font-semibold text-white">${pf.title}</h3>${pf.category ? `<span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full">${pf.category}</span>` : ''}</div>${pf.desc ? `<p class="text-sm text-white/50">${pf.desc}</p>` : ''}</div>`;
-          pg.appendChild(div);
-        });
-      }
+      // Portfolio — 作品集已改为静态封面入口（portfolio-viewer.html），跳过动态渲染
+
 
       // Resume — 已改为静态 HTML 内嵌简历，无需动态渲染
 
