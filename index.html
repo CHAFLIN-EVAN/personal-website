@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVAN's Portfolio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+    }
+
+    /* Code Rain Background */
+    #code-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2.5s ease;
+    }
+    #code-canvas.visible { opacity: 1; }
+
+    /* Splash Section */
+    #splash {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #ffffff;
+      transition: background 2.5s ease;
+    }
+    #splash.dark { background: rgba(10,10,10,0.92); }
+
+    #splash-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+
+    #splash-text {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.8s ease;
+    }
+    #splash-text.visible { opacity: 1; }
+    #splash-text h1 {
+      font-size: clamp(2.8rem, 10vw, 7rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-align: center;
+      line-height: 1.12;
+      background: linear-gradient(270deg, #39ff14, #00ff88, #7fff00, #39ff14);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: neonGradient 3s ease-in-out infinite;
+    }
+    @keyframes neonGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    #splash-text h1 span.divider {
+      font-weight: 200;
+      opacity: 0.35;
+      margin: 0 0.1em;
+    }
+
+    /* Scroll hint */
+    #scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      z-index: 10;
+      cursor: pointer;
+    }
+    #scroll-hint.visible { opacity: 1; }
+    #scroll-hint .arrow {
+      width: 18px; height: 18px;
+      border-right: 1.5px solid rgba(255,255,255,0.3);
+      border-bottom: 1.5px solid rgba(255,255,255,0.3);
+      transform: rotate(45deg);
+      animation: bounceArrow 2s infinite;
+    }
+    @keyframes bounceArrow {
+      0%, 100% { transform: rotate(45deg) translate(0,0); opacity: 0.3; }
+      50% { transform: rotate(45deg) translate(4px,4px); opacity: 0.9; }
+    }
+
+    /* Main Content */
+    #main-content { position: relative; z-index: 3; }
+
+    section.content-section {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      background: transparent;
+    }
+    section.content-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .glass-hover:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 40; height: 0; opacity: 0;
+      transition: all 0.5s ease;
+      pointer-events: none;
+    }
+    #navbar.visible {
+      height: 56px; opacity: 1;
+      pointer-events: auto;
+    }
+    #navbar .nav-inner {
+      max-width: 72rem; margin: 0 auto;
+      height: 100%; display: flex;
+      align-items: center; justify-content: space-between;
+    }
+
+    .hero-avatar {
+      width: clamp(100px, 16vw, 160px);
+      height: clamp(100px, 16vw, 160px);
+    }
+
+    .timeline-dot {
+      width: 16px; height: 16px;
+      background: #6366f1;
+      border: 3px solid rgba(99,102,241,0.3);
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .timeline-line-vert {
+      position: absolute;
+      left: 7px;
+      top: 20px;
+      bottom: -20px;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(99,102,241,0.4), transparent);
+    }
+    .timeline-item:last-child .timeline-line-vert { display: none; }
+
+    .pf-card { transition: all 0.4s ease; }
+    .pf-card:hover { transform: translateY(-6px); }
+    .pf-card .pf-img { height: 200px; overflow: hidden; }
+    .pf-card .pf-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .pf-card:hover .pf-img img { transform: scale(1.08); }
+
+    #admin-btn {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 50;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.35);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #admin-btn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.65); }
+
+    .admin-drawer { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .admin-drawer.open { transform: translateX(0); }
+    .tab-btn.active { color: #818cf8; border-bottom-color: #818cf8; }
+
+    .toast { animation: slideUp 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards; }
+    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; } }
+
+    .file-drop { transition: all 0.2s; }
+    .file-drop.dragover { border-color: #818cf8; background: rgba(99,102,241,0.08); }
+
+    @media (prefers-reduced-motion: reduce) {
+      #splash-canvas { display: none; }
+      #splash-text { opacity: 1; }
+      #splash { background: #0a0a0a; }
+      #code-canvas { opacity: 1; }
+      #scroll-hint { opacity: 1; }
+      section.content-section { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Code Rain Background -->
+  <canvas id="code-canvas"></canvas>
+
+  <!-- Splash Section -->
+  <section id="splash">
+    <canvas id="splash-canvas"></canvas>
+    <div id="splash-text">
+      <h1>EVAN<span class="divider">'</span>S <span class="divider">&nbsp;</span>PORTFOLIO</h1>
+    </div>
+    <div id="scroll-hint">
+      <span>SCROLL</span>
+      <div class="arrow"></div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <nav id="navbar" class="glass">
+    <div class="nav-inner px-4">
+      <a href="#" class="text-lg font-bold tracking-wider text-white">EVAN</a>
+      <div class="flex items-center gap-5 text-sm text-white/60">
+        <a href="#about" class="hover:text-white transition">关于</a>
+        <a href="#portfolio" class="hover:text-white transition">作品集</a>
+        <a href="#resume" class="hover:text-white transition">简历</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Hero -->
+    <section id="hero" class="content-section relative px-4 pt-24 pb-16 md:pt-32 md:pb-24 flex flex-col items-center text-center">
+      <div class="hero-avatar rounded-full overflow-hidden ring-2 ring-white/20 bg-white/5 mb-6 flex-shrink-0">
+        <img id="avatar-img" src="" alt="avatar" class="w-full h-full object-cover hidden">
+        <div class="w-full h-full flex items-center justify-center text-white/30 text-4xl"></div>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight" id="display-name">YOUR NAME</h1>
+      <p class="text-base md:text-lg text-white/60 mb-4" id="display-title">TITLE / TAGLINE</p>
+      <p class="text-white/50 max-w-lg leading-relaxed text-sm md:text-base" id="display-bio" style="max-width:32rem">Welcome to my portfolio.</p>
+    </section>
+
+    <!-- About / Education -->
+    <section id="about" class="content-section relative px-4 py-16 md:py-24">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-10 text-center">教育经历</h2>
+        <div id="education-list" class="space-y-0">
+          <p id="education-empty" class="text-white/30 text-center py-8">暂无教育经历</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section id="portfolio" class="content-section relative px-4 py-16 md:py-24">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-10 text-center">作品集</h2>
+        <div id="portfolio-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <p id="portfolio-empty" class="col-span-full text-white/30 text-center py-8">暂无作品</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resume -->
+    <section id="resume" class="content-section relative px-4 py-16 md:py-24">
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-8 text-center">简历</h2>
+        <div id="resume-content">
+          <p id="resume-empty" class="text-white/30">暂未上传简历</p>
+          <div id="resume-card" class="hidden">
+            <div class="glass inline-flex items-center gap-4 px-6 py-4 rounded-xl">
+              <div class="text-left">
+                <p class="font-medium text-white" id="resume-name">resume.pdf</p>
+                <p class="text-sm text-white/40" id="resume-size"></p>
+              </div>
+              <a id="resume-download" download class="ml-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition text-sm font-medium">下载</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="relative text-center text-sm text-white/20 py-8 border-t border-white/10">
+      &copy; 2026 EVAN's Portfolio
+    </footer>
+  </main>
+
+  <!-- Admin Button -->
+  <button id="admin-btn" onclick="showLogin()" title="管理后台">
+    <i class="fa-solid fa-lock text-sm"></i>
+  </button>
+
+  <!-- Admin Login Modal -->
+  <div id="login-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center p-4" onclick="closeLoginOutside(event)">
+    <div class="bg-zinc-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-white/10" onclick="event.stopPropagation()">
+      <h3 class="text-lg font-bold text-white mb-4">管理后台</h3>
+      <label class="block text-sm text-white/60 mb-1">密码</label>
+      <input type="password" id="login-password" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="请输入密码" onkeydown="if(event.key==='Enter') doLogin()">
+      <div class="flex gap-2">
+        <button onclick="closeLogin()" class="flex-1 px-4 py-2 border border-white/10 text-white/70 rounded-lg hover:bg-white/5 transition">取消</button>
+        <button onclick="doLogin()" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition">登录</button>
+      </div>
+      <p id="login-error" class="text-red-400 text-sm mt-2 hidden">密码错误</p>
+    </div>
+  </div>
+
+  <!-- Admin Drawer -->
+  <div id="admin-drawer" class="admin-drawer fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[480px] bg-zinc-900 shadow-2xl transform translate-x-full flex flex-col border-l border-white/10">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+      <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-cog mr-2 text-indigo-400"></i>管理后台</h2>
+      <button onclick="closeAdmin()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-white/50">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+
+    <div class="flex border-b border-white/10 overflow-x-auto text-sm">
+      <button class="tab-btn active px-4 py-3 border-b-2 border-transparent font-medium whitespace-nowrap text-white/50" data-tab="profile" onclick="switchTab('profile')"><i class="fa-solid fa-user mr-1"></i>基本资料</button>
+      <button class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium whitespace-nowrap text-white/50" data-tab="education" onclick="switchTab('education')"><i class="fa-solid fa-graduation-cap mr-1"></i>教育经历</button>
+      <button class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium whitespace-nowrap text-white/50" data-tab="resume-admin" onclick="switchTab('resume-admin')"><i class="fa-solid fa-file-lines mr-1"></i>简历</button>
+      <button class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium whitespace-nowrap text-white/50" data-tab="portfolio-admin" onclick="switchTab('portfolio-admin')"><i class="fa-solid fa-briefcase mr-1"></i>作品集</button>
+      <button class="tab-btn px-4 py-3 border-b-2 border-transparent font-medium whitespace-nowrap text-white/50" data-tab="settings" onclick="switchTab('settings')"><i class="fa-solid fa-wrench mr-1"></i>设置</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 text-white/80">
+      <!-- Profile -->
+      <div class="tab-content" id="tab-profile">
+        <h3 class="font-semibold text-white mb-4">基本资料</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm text-white/50 mb-1">头像</label>
+            <div class="flex items-center gap-4">
+              <div class="w-20 h-20 rounded-full overflow-hidden bg-zinc-800 flex-shrink-0 ring-1 ring-white/10">
+                <img id="admin-avatar-img" src="" alt="" class="w-full h-full object-cover hidden">
+                <div class="w-full h-full flex items-center justify-center text-white/20 text-2xl"><i class="fa-solid fa-user"></i></div>
+              </div>
+              <div class="file-drop flex-1 border-2 border-dashed border-white/10 rounded-lg p-4 text-center cursor-pointer hover:border-indigo-500/50" onclick="document.getElementById('avatar-input').click()">
+                <i class="fa-solid fa-cloud-arrow-up text-white/20 text-xl"></i>
+                <p class="text-xs text-white/30 mt-1">点击上传头像</p>
+                <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm text-white/50 mb-1">姓名</label>
+            <input type="text" id="edit-name" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="Your Name">
+          </div>
+          <div>
+            <label class="block text-sm text-white/50 mb-1">头衔</label>
+            <input type="text" id="edit-title" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="Developer / Designer">
+          </div>
+          <div>
+            <label class="block text-sm text-white/50 mb-1">简介</label>
+            <textarea id="edit-bio" rows="3" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20"></textarea>
+          </div>
+          <button onclick="saveProfile()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition"><i class="fa-solid fa-floppy-disk mr-1"></i>保存资料</button>
+        </div>
+      </div>
+
+      <!-- Education Admin -->
+      <div class="tab-content hidden" id="tab-education">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-white">教育经历</h3>
+          <button onclick="showEduModal()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition text-sm"><i class="fa-solid fa-plus mr-1"></i>添加</button>
+        </div>
+        <div id="admin-education-list" class="space-y-2"></div>
+        <p id="admin-edu-empty" class="text-white/30 text-center py-4 text-sm hidden">暂无教育经历</p>
+      </div>
+
+      <!-- Resume Admin -->
+      <div class="tab-content hidden" id="tab-resume-admin">
+        <h3 class="font-semibold text-white mb-4">简历管理</h3>
+        <div class="file-drop border-2 border-dashed border-white/10 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-500/50" onclick="document.getElementById('resume-input').click()">
+          <i class="fa-solid fa-cloud-arrow-up text-white/20 text-3xl"></i>
+          <p class="text-white/40 mt-2 text-sm">点击上传简历 (PDF)</p>
+          <input type="file" id="resume-input" accept=".pdf,application/pdf" class="hidden" onchange="handleResumeUpload(event)">
+        </div>
+        <div id="admin-resume-current" class="hidden mt-4">
+          <div class="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg">
+            <i class="fa-solid fa-file-pdf text-indigo-400 text-xl"></i>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-white/80 truncate" id="admin-resume-name"></p>
+              <p class="text-xs text-white/40" id="admin-resume-size"></p>
+            </div>
+            <button onclick="deleteResume()" class="text-red-400 hover:text-red-300 transition"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portfolio Admin -->
+      <div class="tab-content hidden" id="tab-portfolio-admin">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-white">作品集</h3>
+          <button onclick="showPortfolioModal()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition text-sm"><i class="fa-solid fa-plus mr-1"></i>添加</button>
+        </div>
+        <div id="admin-portfolio-list" class="space-y-2"></div>
+        <p id="admin-portfolio-empty" class="text-white/30 text-center py-4 text-sm hidden">暂无作品</p>
+      </div>
+
+      <!-- Settings -->
+      <div class="tab-content hidden" id="tab-settings">
+        <h3 class="font-semibold text-white mb-4">设置</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm text-white/50 mb-1">修改密码</label>
+            <div class="flex gap-2">
+              <input type="password" id="new-password" class="flex-1 bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="新密码（至少6位）">
+              <button onclick="changePassword()" class="px-4 py-2 bg-white/10 text-white/80 rounded-lg hover:bg-white/20 transition text-sm">修改</button>
+            </div>
+          </div>
+          <div class="border-t border-white/10 pt-4 space-y-2">
+            <button onclick="exportData()" class="w-full px-4 py-2 border border-indigo-500/30 text-indigo-300 rounded-lg hover:bg-indigo-500/10 transition text-sm"><i class="fa-solid fa-download mr-1"></i>导出数据备份</button>
+            <div class="file-drop border-2 border-dashed border-white/10 rounded-lg p-4 text-center cursor-pointer hover:border-indigo-500/50" onclick="document.getElementById('import-input').click()">
+              <i class="fa-solid fa-upload text-white/20"></i>
+              <p class="text-xs text-white/30 mt-1">导入数据备份</p>
+              <input type="file" id="import-input" accept=".json" class="hidden" onchange="importData(event)">
+            </div>
+            <button onclick="resetAll()" class="w-full px-4 py-2 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/10 transition text-sm"><i class="fa-solid fa-trash-can mr-1"></i>重置所有数据</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Education Modal -->
+  <div id="edu-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center p-4" onclick="closeModalOutside(event,'edu-modal')">
+    <div class="bg-zinc-900 rounded-2xl shadow-2xl p-6 w-full max-w-lg border border-white/10" onclick="event.stopPropagation()">
+      <h3 class="text-lg font-bold text-white mb-4" id="edu-modal-title">添加教育经历</h3>
+      <div class="space-y-3">
+        <input type="text" id="edu-school" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="学校名称">
+        <input type="text" id="edu-degree" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="学位 / 专业">
+        <input type="text" id="edu-year" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="时间 (如：2019 - 2023)">
+        <textarea id="edu-desc" rows="2" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="描述（可选）"></textarea>
+      </div>
+      <input type="hidden" id="edu-edit-id">
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeEduModal()" class="flex-1 px-4 py-2 border border-white/10 text-white/70 rounded-lg hover:bg-white/5 transition">取消</button>
+        <button onclick="saveEducation()" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portfolio Modal -->
+  <div id="portfolio-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center p-4" onclick="closeModalOutside(event,'portfolio-modal')">
+    <div class="bg-zinc-900 rounded-2xl shadow-2xl p-6 w-full max-w-lg border border-white/10" onclick="event.stopPropagation()">
+      <h3 class="text-lg font-bold text-white mb-4" id="portfolio-modal-title">添加作品</h3>
+      <div class="space-y-3">
+        <input type="text" id="pf-title" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="作品名称">
+        <textarea id="pf-desc" rows="2" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="作品描述"></textarea>
+        <input type="text" id="pf-category" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="分类">
+        <div class="file-drop border-2 border-dashed border-white/10 rounded-lg p-4 text-center cursor-pointer hover:border-indigo-500/50" onclick="document.getElementById('pf-image-input').click()">
+          <p class="text-sm text-white/40"><i class="fa-solid fa-image mr-1"></i>上传图片</p>
+          <input type="file" id="pf-image-input" accept="image/*" class="hidden" onchange="previewPfImage(event)">
+        </div>
+        <img id="pf-image-preview" class="hidden mt-1 w-full h-36 object-cover rounded-lg">
+        <input type="url" id="pf-image-url" class="w-full bg-zinc-800 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder:text-white/20" placeholder="或输入图片 URL" oninput="previewPfUrl(event)">
+      </div>
+      <input type="hidden" id="pf-edit-id">
+      <input type="hidden" id="pf-image-data">
+      <div class="flex gap-2 mt-4">
+        <button onclick="closePortfolioModal()" class="flex-1 px-4 py-2 border border-white/10 text-white/70 rounded-lg hover:bg-white/5 transition">取消</button>
+        <button onclick="savePortfolio()" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] space-y-2"></div>
+
+  <script>
+    // ================================================================
+    //  SPLASH — Particles → Silk Web → EVAN'S PORTFOLIO
+    // ================================================================
+
+    const splash = document.getElementById('splash');
+    const splashCanvas = document.getElementById('splash-canvas');
+    const splashText = document.getElementById('splash-text');
+    const scrollHint = document.getElementById('scroll-hint');
+    const codeCanvas = document.getElementById('code-canvas');
+    const ctx = splashCanvas.getContext('2d');
+    const codeCtx = codeCanvas.getContext('2d');
+    let cw, ch, particles = [], textTargets = [], animationDone = false;
+    let splashStart = null;
+    let codeRainDrops = [];
+
+    function resizeCanvases() {
+      cw = splashCanvas.width = splashCanvas.clientWidth;
+      ch = splashCanvas.height = splashCanvas.clientHeight;
+      if (codeCanvas) { codeCanvas.width = window.innerWidth; codeCanvas.height = window.innerHeight; }
+    }
+    window.addEventListener('resize', resizeCanvases);
+    resizeCanvases();
+
+    // ---- Sample text to get pixel positions ----
+    function sampleTextPixels(text) {
+      const off = document.createElement('canvas');
+      off.width = cw; off.height = ch;
+      const octx = off.getContext('2d');
+      octx.textAlign = 'center'; octx.textBaseline = 'middle';
+      const fs = Math.floor(text.length > 12 ? cw * 0.1 : cw * 0.16);
+      octx.font = `900 ${fs}px system-ui, -apple-system, sans-serif`;
+      octx.fillText(text, cw / 2, ch / 2);
+      const data = octx.getImageData(0, 0, cw, ch).data;
+      const pts = [];
+      const step = Math.max(4, Math.floor(Math.min(cw, ch) / 140));
+      for (let y = ch * 0.15; y < ch * 0.85; y += step)
+        for (let x = cw * 0.02; x < cw * 0.98; x += step)
+          if (data[(Math.floor(y) * cw + Math.floor(x)) * 4] > 128) pts.push({ x, y });
+      return pts;
+    }
+
+    // ---- Particle ----
+    class Particle {
+      constructor(tx, ty) {
+        this.tx = tx; this.ty = ty;
+        const angle = Math.random() * Math.PI * 2;
+        this.x = cw / 2 + Math.cos(angle) * (10 + Math.random() * 60);
+        this.y = ch / 2 + Math.sin(angle) * (10 + Math.random() * 60);
+        const ra = Math.random() * Math.PI * 2;
+        const rd = 80 + Math.random() * Math.max(cw, ch) * 0.3;
+        this.rx = cw / 2 + Math.cos(ra) * rd;
+        this.ry = ch / 2 + Math.sin(ra) * rd;
+        this.vx = 0; this.vy = 0;
+        this.phase = Math.random() * Math.PI * 2;
+        // Ink wash properties
+        this.inkX = 0;
+        this.inkY = 0;
+        this.inkA = 1;
+        this.sw = 1.8 + Math.random() * 2.8;
+        this.sh = 1.8 + Math.random() * 2.8;
+      }
+    }
+
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+    const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    // ---- Mouse tracking ----
+    let mouseX = cw / 2;
+    let mouseY = ch / 2;
+    document.addEventListener('mousemove', (e) => {
+      const rect = splashCanvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+
+    function initParticles() {
+      textTargets = sampleTextPixels("EVAN'S PORTFOLIO");
+      if (textTargets.length < 50) {
+        for (let y = ch * 0.3; y < ch * 0.7; y += 5)
+          for (let x = cw * 0.1; x < cw * 0.9; x += 5)
+            textTargets.push({ x, y });
+      }
+      particles = textTargets.map(t => new Particle(t.x, t.y));
+      // Add subtle jitter to break up grid patterns for natural look
+      for (const p of particles) {
+        p.tx += (Math.random() - 0.5) * 2.8;
+        p.ty += (Math.random() - 0.5) * 2.8;
+      }
+    }
+
+    // ---- Draw ----
+    let lastPhase = -1;
+
+    function drawSplash(ts) {
+      if (!splashStart) splashStart = ts;
+      const elapsed = (ts - splashStart) / 1000;
+
+      ctx.clearRect(0, 0, cw, ch);
+
+      // ---- Ink-wash mouse interaction ----
+      if (animationDone) {
+        ctx.fillStyle = '#fff';
+        for (const p of particles) {
+          const dx = p.tx - mouseX;
+          const dy = p.ty - mouseY;
+          const dist2 = dx * dx + dy * dy;
+
+          // Ink effect: particles disperse like ink from brush stroke
+          const push = Math.exp(-dist2 * 0.0008) * 14;
+          const angle = Math.atan2(dy, dx);
+          p.inkX += (Math.cos(angle) * push - p.inkX) * 0.1;
+          p.inkY += (Math.sin(angle) * push - p.inkY) * 0.1;
+          p.inkA += (1 - Math.exp(-dist2 * 0.0006) * 0.5 - p.inkA) * 0.08;
+
+          // Rhythmic pulse: each rectangle breathes with its own phase
+          const pulse = Math.sin(elapsed * 3.2 + p.phase * 1.7) * 0.3 + 1;
+          const pw = p.sw * pulse;
+          const ph = p.sh * pulse;
+
+          const px = p.tx + p.inkX;
+          const py = p.ty + p.inkY;
+
+          ctx.globalAlpha = p.inkA * 0.5;
+          ctx.fillRect(px - pw / 2, py - ph / 2, pw, ph);
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(drawSplash);
+        return;
+      }
+
+      // Phases: 0=pre, 1=ripple, 2=morph, 3=settled
+      const phase = elapsed < 0.75 ? 0 : elapsed < 2.25 ? 1 : elapsed < 3.75 ? 2 : 3;
+
+      if (phase >= 1) {
+        const rippleT = Math.min(1, (elapsed - 0.75) / 1.5);
+        const morphT = phase >= 2 ? Math.min(1, (elapsed - 2.25) / 1.5) : 0;
+        const settledT = phase >= 3 ? Math.min(1, (elapsed - 3.75) / 0.75) : 0;
+
+        // Update particles
+        for (const p of particles) {
+          let tx, ty;
+          if (morphT > 0) {
+            const eased = easeInOutCubic(morphT);
+            const rx = lerp(cw / 2, p.rx, easeOutCubic(rippleT));
+            const ry = lerp(ch / 2, p.ry, easeOutCubic(rippleT));
+            tx = lerp(rx, p.tx, eased);
+            ty = lerp(ry, p.ty, eased);
+          } else {
+            tx = lerp(cw / 2, p.rx, easeOutCubic(rippleT));
+            ty = lerp(ch / 2, p.ry, easeOutCubic(rippleT));
+          }
+
+          // Wave oscillation during ripple
+          if (morphT < 1) {
+            const w = Math.sin(elapsed * 3 + p.phase) * (1 - morphT) * 2.5;
+            const wa = Math.atan2(ty - ch / 2, tx - cw / 2) || 0;
+            tx += Math.cos(wa) * w;
+            ty += Math.sin(wa) * w;
+          }
+
+          // Gentle breathe after settling
+          if (settledT > 0 && morphT >= 1) {
+            const b = Math.sin(elapsed * 0.5 + p.phase) * 1.2;
+            tx += Math.cos(elapsed * 0.3 + p.phase * 1.3) * b * (1 - settledT * 0.6);
+            ty += Math.sin(elapsed * 0.4 + p.phase * 0.7) * b * (1 - settledT * 0.6);
+          }
+
+          p.vx += (tx - p.x) * 0.07;
+          p.vy += (ty - p.y) * 0.07;
+          p.vx *= 0.88;
+          p.vy *= 0.88;
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+
+        // ---- Draw silk web ----
+        // Color: black → white transition
+        const colP = settledT > 0 ? Math.min(1, (elapsed - 7.5) / 3) : 0;
+        const cv = Math.round(lerp(0, 255, colP * 0.85));
+        const lineAlpha = morphT > 0.9 ? 0.08 + 0.06 * (1 - morphT) : 0.1 + 0.15 * (1 - morphT * 0.5);
+
+        // Spatial grid for neighbor lookup
+        const cell = 40;
+        const grid = {};
+        for (const p of particles) {
+          const k = Math.floor(p.x / cell) + ',' + Math.floor(p.y / cell);
+          if (!grid[k]) grid[k] = [];
+          grid[k].push(p);
+        }
+
+        ctx.strokeStyle = `rgba(${cv},${cv},${cv},${lineAlpha})`;
+        ctx.lineWidth = morphT > 0.8 ? 0.5 : 0.8;
+        const maxDist = morphT > 0.8 ? 12 : 26;
+
+        let lc = 0;
+        const drawn = new Set();
+
+        for (const key in grid) {
+          if (lc > 1200) break;
+          const [gx, gy] = key.split(',').map(Number);
+          for (let dx = -1; dx <= 1 && lc < 1200; dx++) {
+            for (let dy = -1; dy <= 1 && lc < 1200; dy++) {
+              const a = grid[key];
+              const b = grid[(gx + dx) + ',' + (gy + dy)];
+              if (!a || !b) continue;
+              for (let i = 0; i < a.length && lc < 1200; i++) {
+                for (let j = 0; j < b.length && lc < 1200; j++) {
+                  if (a[i] === b[j]) continue;
+                  const id = a[i].x < b[j].x
+                    ? a[i].x + ',' + a[i].y + '-' + b[j].x + ',' + b[j].y
+                    : b[j].x + ',' + b[j].y + '-' + a[i].x + ',' + a[i].y;
+                  if (drawn.has(id)) continue;
+                  drawn.add(id);
+                  const dx2 = a[i].x - b[j].x;
+                  const dy2 = a[i].y - b[j].y;
+                  if (dx2 * dx2 + dy2 * dy2 < maxDist * maxDist) {
+                    ctx.globalAlpha = (1 - Math.sqrt(dx2 * dx2 + dy2 * dy2) / maxDist) * 0.25;
+                    ctx.beginPath();
+                    ctx.moveTo(a[i].x, a[i].y);
+                    ctx.lineTo(b[j].x, b[j].y);
+                    ctx.stroke();
+                    lc++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        ctx.globalAlpha = 1;
+
+        // Draw particle rects
+        const dotAlpha = morphT > 0.5 ? 0.5 + 0.3 * morphT : 0.7;
+        ctx.fillStyle = `rgba(${cv},${cv},${cv},${dotAlpha})`;
+        for (const p of particles) {
+          ctx.fillRect(p.x - p.sw / 2, p.y - p.sh / 2, p.sw, p.sh);
+        }
+
+        // Background transition via CSS
+        if (morphT > 0.6 && !splash.classList.contains('dark')) {
+          splash.classList.add('dark');
+        }
+
+        // UI
+        if (morphT > 0.85 && !splashText.classList.contains('visible')) splashText.classList.add('visible');
+        if (elapsed > 3.75) scrollHint.classList.add('visible');
+        if (elapsed > 4.25 && !animationDone) {
+          animationDone = true;
+          document.body.style.overflow = '';
+        }
+      }
+
+      requestAnimationFrame(drawSplash);
+    }
+
+    // ---- Start ----
+    document.body.style.overflow = 'hidden';
+    initParticles();
+    requestAnimationFrame(drawSplash);
+
+    // Safety net
+    setTimeout(() => {
+      if (!animationDone) {
+        animationDone = true;
+        splashText.classList.add('visible');
+        scrollHint.classList.add('visible');
+        splash.classList.add('dark');
+        document.body.style.overflow = '';
+      }
+    }, 8000);
+
+    // ================================================================
+    //  CODE RAIN
+    // ================================================================
+
+    function initCodeRain() {
+      const cols = Math.floor(codeCanvas.width / 12);
+      codeRainDrops = [];
+      const chars = 'consolelogfunctionreturnimportexportclassconstletvarifelsedataentryresponseawaitasync0123456789{}[]<>()/*+-=';
+      for (let i = 0; i < cols; i++) {
+        codeRainDrops.push({
+          x: i * 12,
+          y: Math.random() * codeCanvas.height,
+          speed: 0.3 + Math.random() * 0.8,
+          chars: Array.from({ length: 6 + Math.floor(Math.random() * 10) }, () => chars[Math.floor(Math.random() * chars.length)]),
+          head: Math.floor(Math.random() * 10),
+          opacity: 0.06 + Math.random() * 0.08
+        });
+      }
+    }
+    initCodeRain();
+    codeCanvas.classList.add('visible'); // code rain visible from start (behind splash)
+
+    function drawCodeRain() {
+      codeCtx.clearRect(0, 0, codeCanvas.width, codeCanvas.height);
+      codeCtx.font = '13px "Courier New", monospace';
+      for (const drop of codeRainDrops) {
+        drop.y += drop.speed;
+        if (drop.y > codeCanvas.height + 20) { drop.y = -drop.chars.length * 12; drop.head = Math.floor(Math.random() * drop.chars.length); }
+        for (let i = 0; i < drop.chars.length; i++) {
+          const y = drop.y - i * 12;
+          if (y < -10 || y > codeCanvas.height) continue;
+          const dist = Math.abs(i - drop.head);
+          const a = drop.opacity * (1 - dist / drop.chars.length * 0.7);
+          codeCtx.fillStyle = dist < 2 ? `rgba(190,220,255,${a * 1.5})` : `rgba(110,160,220,${a * 0.6})`;
+          codeCtx.fillText(drop.chars[i], drop.x, y);
+        }
+      }
+      requestAnimationFrame(drawCodeRain);
+    }
+    requestAnimationFrame(drawCodeRain);
+
+    window.addEventListener('resize', () => { codeCanvas.width = window.innerWidth; codeCanvas.height = window.innerHeight; initCodeRain(); });
+
+    // ================================================================
+    //  SCROLL REVEAL
+    // ================================================================
+
+    const scrollObserver = new IntersectionObserver(
+      entries => { for (const e of entries) if (e.isIntersecting) { e.target.classList.add('visible'); scrollObserver.unobserve(e.target); } },
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll('.content-section').forEach(el => scrollObserver.observe(el));
+
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('visible', window.scrollY > window.innerHeight * 0.6);
+    });
+
+    // ================================================================
+    //  DATA LAYER
+    // ================================================================
+
+    const STORAGE_KEY = 'personal_website_data';
+    function defaultData() { return { name: '', title: '', bio: '', avatar: '', education: [], resume: null, portfolio: [], password: 'admin123' }; }
+    function getData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { const d = JSON.parse(raw); const def = defaultData(); for (const k in def) if (!(k in d)) d[k] = def[k]; return d; }
+      } catch(e) {}
+      return defaultData();
+    }
+    function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+    function toast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-indigo-600' };
+      const icons = { success: 'fa-check-circle', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
+      const t = document.createElement('div');
+      t.className = `toast ${colors[type]||'bg-zinc-700'} text-white px-4 py-3 rounded-xl shadow-lg text-sm flex items-center gap-2`;
+      t.innerHTML = `<i class="fa-solid ${icons[type]||'fa-circle-info'}"></i> ${msg}`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    let _pendingAvatar = '';
+    function handleAvatarUpload(e) {
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      if (file.size > 5*1024*1024) { toast('图片不能超过 5MB', 'error'); return; }
+      const r = new FileReader();
+      r.onload = function(ev) {
+        document.getElementById('admin-avatar-img').src = ev.target.result;
+        document.getElementById('admin-avatar-img').classList.remove('hidden');
+        _pendingAvatar = ev.target.result;
+        toast('头像已上传，请点击"保存资料"');
+      };
+      r.readAsDataURL(file);
+    }
+
+    function handleResumeUpload(e) {
+      const file = e.target.files[0];
+      if (!file || file.type !== 'application/pdf') { toast('请上传 PDF 文件', 'error'); return; }
+      if (file.size > 20*1024*1024) { toast('PDF 不能超过 20MB', 'error'); return; }
+      const r = new FileReader();
+      r.onload = function(ev) {
+        const data = getData();
+        data.resume = { name: file.name, data: ev.target.result, size: file.size };
+        saveData(data); renderAll(); toast('简历已上传');
+      };
+      r.readAsDataURL(file);
+    }
+
+    function saveProfile() {
+      const data = getData();
+      data.name = document.getElementById('edit-name').value.trim();
+      data.title = document.getElementById('edit-title').value.trim();
+      data.bio = document.getElementById('edit-bio').value.trim();
+      if (_pendingAvatar) { data.avatar = _pendingAvatar; _pendingAvatar = ''; }
+      saveData(data); renderAll(); toast('资料已保存');
+    }
+
+    function showEduModal(id) {
+      document.getElementById('edu-modal').classList.remove('hidden');
+      if (id) {
+        const data = getData();
+        const edu = data.education.find(e => e.id === id);
+        if (!edu) return;
+        document.getElementById('edu-modal-title').textContent = '编辑教育经历';
+        document.getElementById('edu-school').value = edu.school || '';
+        document.getElementById('edu-degree').value = edu.degree || '';
+        document.getElementById('edu-year').value = edu.year || '';
+        document.getElementById('edu-desc').value = edu.desc || '';
+        document.getElementById('edu-edit-id').value = id;
+      } else {
+        document.getElementById('edu-modal-title').textContent = '添加教育经历';
+        ['edu-school','edu-degree','edu-year','edu-desc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('edu-edit-id').value = '';
+      }
+    }
+    function closeEduModal() { document.getElementById('edu-modal').classList.add('hidden'); }
+    function saveEducation() {
+      const school = document.getElementById('edu-school').value.trim();
+      const degree = document.getElementById('edu-degree').value.trim();
+      const year = document.getElementById('edu-year').value.trim();
+      const desc = document.getElementById('edu-desc').value.trim();
+      const editId = document.getElementById('edu-edit-id').value;
+      if (!school || !degree || !year) { toast('请填写完整信息', 'error'); return; }
+      const data = getData();
+      if (editId) { const idx = data.education.findIndex(e => e.id === editId); if (idx !== -1) data.education[idx] = { ...data.education[idx], school, degree, year, desc }; }
+      else { data.education.push({ id: Date.now().toString(), school, degree, year, desc }); }
+      saveData(data); renderAll(); closeEduModal(); toast(editId ? '已更新' : '已添加');
+    }
+    function deleteEducation(id) {
+      if (!confirm('确定删除？')) return;
+      const data = getData();
+      data.education = data.education.filter(e => e.id !== id);
+      saveData(data); renderAll(); toast('已删除', 'info');
+    }
+
+    let _pendingPfImage = '';
+    function showPortfolioModal(id) {
+      document.getElementById('portfolio-modal').classList.remove('hidden');
+      document.getElementById('pf-image-preview').classList.add('hidden');
+      document.getElementById('pf-image-data').value = '';
+      document.getElementById('pf-image-url').value = '';
+      _pendingPfImage = '';
+      if (id) {
+        const data = getData();
+        const pf = data.portfolio.find(p => p.id === id);
+        if (!pf) return;
+        document.getElementById('portfolio-modal-title').textContent = '编辑作品';
+        document.getElementById('pf-title').value = pf.title || '';
+        document.getElementById('pf-desc').value = pf.desc || '';
+        document.getElementById('pf-category').value = pf.category || '';
+        document.getElementById('pf-edit-id').value = id;
+        if (pf.image) {
+          if (pf.image.startsWith('data:')) { document.getElementById('pf-image-preview').src = pf.image; document.getElementById('pf-image-preview').classList.remove('hidden'); document.getElementById('pf-image-data').value = pf.image; }
+          else { document.getElementById('pf-image-url').value = pf.image; }
+        }
+      } else {
+        document.getElementById('portfolio-modal-title').textContent = '添加作品';
+        ['pf-title','pf-desc','pf-category'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('pf-edit-id').value = '';
+      }
+    }
+    function closePortfolioModal() { document.getElementById('portfolio-modal').classList.add('hidden'); }
+    function previewPfImage(e) {
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      if (file.size > 5*1024*1024) { toast('图片不能超过 5MB', 'error'); return; }
+      const r = new FileReader();
+      r.onload = function(ev) { document.getElementById('pf-image-preview').src = ev.target.result; document.getElementById('pf-image-preview').classList.remove('hidden'); document.getElementById('pf-image-data').value = ev.target.result; document.getElementById('pf-image-url').value = ''; };
+      r.readAsDataURL(file);
+    }
+    function previewPfUrl(e) {
+      const url = e.target.value.trim();
+      if (url) { document.getElementById('pf-image-preview').src = url; document.getElementById('pf-image-preview').classList.remove('hidden'); document.getElementById('pf-image-data').value = ''; }
+      else { document.getElementById('pf-image-preview').classList.add('hidden'); }
+    }
+    function savePortfolio() {
+      const title = document.getElementById('pf-title').value.trim();
+      const desc = document.getElementById('pf-desc').value.trim();
+      const category = document.getElementById('pf-category').value.trim();
+      const editId = document.getElementById('pf-edit-id').value;
+      const imgData = document.getElementById('pf-image-data').value;
+      const imgUrl = document.getElementById('pf-image-url').value.trim();
+      const image = imgData || imgUrl || '';
+      if (!title) { toast('请输入作品名称', 'error'); return; }
+      const data = getData();
+      if (editId) { const idx = data.portfolio.findIndex(p => p.id === editId); if (idx !== -1) data.portfolio[idx] = { ...data.portfolio[idx], title, desc, category, image }; }
+      else { data.portfolio.push({ id: Date.now().toString(), title, desc, category, image }); }
+      saveData(data); renderAll(); closePortfolioModal(); toast(editId ? '已更新' : '已添加');
+    }
+    function deletePortfolio(id) {
+      if (!confirm('确定删除？')) return;
+      const data = getData();
+      data.portfolio = data.portfolio.filter(p => p.id !== id);
+      saveData(data); renderAll(); toast('已删除', 'info');
+    }
+    function deleteResume() {
+      if (!confirm('确定删除简历？')) return;
+      const data = getData();
+      data.resume = null; saveData(data); renderAll(); toast('已删除', 'info');
+    }
+
+    function renderAll() {
+      const d = getData();
+      document.getElementById('display-name').textContent = d.name || 'YOUR NAME';
+      document.getElementById('display-title').textContent = d.title || 'TITLE / TAGLINE';
+      document.getElementById('display-bio').textContent = d.bio || 'Welcome to my portfolio.';
+
+      const ai = document.getElementById('avatar-img');
+      const aai = document.getElementById('admin-avatar-img');
+      if (d.avatar) { ai.src = d.avatar; ai.classList.remove('hidden'); aai.src = d.avatar; aai.classList.remove('hidden'); }
+      else { ai.classList.add('hidden'); aai.classList.add('hidden'); }
+
+      // Education
+      const el = document.getElementById('education-list');
+      document.querySelectorAll('.edu-card').forEach(e => e.remove());
+      const ee = document.getElementById('education-empty');
+      if (d.education.length === 0) { ee.classList.remove('hidden'); }
+      else {
+        ee.classList.add('hidden');
+        d.education.forEach(edu => {
+          const div = document.createElement('div');
+          div.className = 'edu-card flex gap-4 relative pb-8';
+          div.innerHTML = `<div class="flex flex-col items-center"><div class="timeline-dot"></div><div class="timeline-line-vert"></div></div><div class="flex-1 glass rounded-xl p-4"><span class="inline-block px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full font-medium mb-1">${edu.year}</span><h3 class="font-semibold text-white">${edu.school}</h3><p class="text-sm text-white/60">${edu.degree}</p>${edu.desc ? `<p class="text-sm text-white/40 mt-1">${edu.desc}</p>` : ''}</div>`;
+          el.appendChild(div);
+        });
+      }
+
+      // Portfolio
+      const pg = document.getElementById('portfolio-grid');
+      document.querySelectorAll('.pf-card').forEach(e => e.remove());
+      const pe = document.getElementById('portfolio-empty');
+      if (d.portfolio.length === 0) { pe.classList.remove('hidden'); }
+      else {
+        pe.classList.add('hidden');
+        d.portfolio.forEach(pf => {
+          const div = document.createElement('div');
+          div.className = 'pf-card glass glass-hover rounded-xl overflow-hidden';
+          div.innerHTML = `<div class="pf-img">${pf.image ? `<img src="${pf.image}" alt="${pf.title}" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10\\'></div>'">` : `<div class="w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10"></div>`}</div><div class="p-4"><div class="flex items-center gap-2 mb-1 flex-wrap"><h3 class="font-semibold text-white">${pf.title}</h3>${pf.category ? `<span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs rounded-full">${pf.category}</span>` : ''}</div>${pf.desc ? `<p class="text-sm text-white/50">${pf.desc}</p>` : ''}</div>`;
+          pg.appendChild(div);
+        });
+      }
+
+      // Resume
+      const rc = document.getElementById('resume-card');
+      const re = document.getElementById('resume-empty');
+      if (d.resume) {
+        rc.classList.remove('hidden'); re.classList.add('hidden');
+        document.getElementById('resume-name').textContent = d.resume.name;
+        document.getElementById('resume-size').textContent = formatSize(d.resume.size);
+        document.getElementById('resume-download').href = d.resume.data;
+      } else { rc.classList.add('hidden'); re.classList.remove('hidden'); }
+
+      // Admin lists
+      const ael = document.getElementById('admin-education-list');
+      ael.innerHTML = '';
+      const aee = document.getElementById('admin-edu-empty');
+      if (d.education.length === 0) { aee.classList.remove('hidden'); }
+      else {
+        aee.classList.add('hidden');
+        d.education.forEach(edu => {
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-3 p-3 bg-zinc-800 rounded-lg';
+          div.innerHTML = `<div class="flex-1 min-w-0"><p class="font-medium text-sm text-white/80">${edu.school}</p><p class="text-xs text-white/40">${edu.degree} · ${edu.year}</p></div><button onclick="showEduModal('${edu.id}')" class="text-indigo-400 hover:text-indigo-300 transition text-sm"><i class="fa-solid fa-pen"></i></button><button onclick="deleteEducation('${edu.id}')" class="text-red-400 hover:text-red-300 transition text-sm"><i class="fa-solid fa-trash-can"></i></button>`;
+          ael.appendChild(div);
+        });
+      }
+
+      const apl = document.getElementById('admin-portfolio-list');
+      apl.innerHTML = '';
+      const ape = document.getElementById('admin-portfolio-empty');
+      if (d.portfolio.length === 0) { ape.classList.remove('hidden'); }
+      else {
+        ape.classList.add('hidden');
+        d.portfolio.forEach(pf => {
+          const div = document.createElement('div');
+          div.className = 'flex items-center gap-3 p-3 bg-zinc-800 rounded-lg';
+          div.innerHTML = `${pf.image ? `<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-700"><img src="${pf.image}" class="w-full h-full object-cover" onerror="this.style.display='none'"></div>` : `<div class="w-12 h-12 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 flex-shrink-0"><i class="fa-solid fa-image"></i></div>`}<div class="flex-1 min-w-0"><p class="font-medium text-sm text-white/80 truncate">${pf.title}</p><p class="text-xs text-white/40">${pf.category || '未分类'}</p></div><button onclick="showPortfolioModal('${pf.id}')" class="text-indigo-400 hover:text-indigo-300 transition text-sm"><i class="fa-solid fa-pen"></i></button><button onclick="deletePortfolio('${pf.id}')" class="text-red-400 hover:text-red-300 transition text-sm"><i class="fa-solid fa-trash-can"></i></button>`;
+          apl.appendChild(div);
+        });
+      }
+
+      const arc = document.getElementById('admin-resume-current');
+      if (d.resume) { arc.classList.remove('hidden'); document.getElementById('admin-resume-name').textContent = d.resume.name; document.getElementById('admin-resume-size').textContent = formatSize(d.resume.size); }
+      else { arc.classList.add('hidden'); }
+
+      document.getElementById('edit-name').value = d.name || '';
+      document.getElementById('edit-title').value = d.title || '';
+      document.getElementById('edit-bio').value = d.bio || '';
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/(1024*1024)).toFixed(1) + ' MB';
+    }
+
+    function showLogin() {
+      document.getElementById('login-modal').classList.remove('hidden');
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-error').classList.add('hidden');
+      setTimeout(() => document.getElementById('login-password').focus(), 100);
+    }
+    function closeLogin() { document.getElementById('login-modal').classList.add('hidden'); }
+    function closeLoginOutside(e) { if (e.target === e.currentTarget) closeLogin(); }
+    function doLogin() {
+      if (document.getElementById('login-password').value === getData().password) { closeLogin(); openAdmin(); }
+      else { document.getElementById('login-error').classList.remove('hidden'); }
+    }
+    function openAdmin() { document.getElementById('admin-drawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeAdmin() { document.getElementById('admin-drawer').classList.remove('open'); document.body.style.overflow = ''; }
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.getElementById('tab-'+tab).classList.remove('hidden');
+    }
+    function changePassword() {
+      const pwd = document.getElementById('new-password').value.trim();
+      if (!pwd || pwd.length < 6) { toast('密码至少6位', 'error'); return; }
+      const data = getData();
+      data.password = pwd;
+      saveData(data);
+      document.getElementById('new-password').value = '';
+      toast('密码已修改');
+    }
+    function exportData() {
+      const data = getData();
+      const exp = { ...data, password: undefined };
+      const blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('数据已导出');
+    }
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const r = new FileReader();
+      r.onload = function(ev) {
+        try {
+          const imp = JSON.parse(ev.target.result);
+          const data = getData();
+          const pw = data.password;
+          Object.assign(data, imp);
+          data.password = pw;
+          saveData(data); renderAll(); toast('数据已导入');
+        } catch(err) { toast('导入失败：文件格式错误', 'error'); }
+      };
+      r.readAsText(file);
+      e.target.value = '';
+    }
+    function resetAll() {
+      if (!confirm('确定重置所有数据？此操作不可撤销！')) return;
+      if (!confirm('再次确认：所有数据将被清除！')) return;
+      const pw = getData().password;
+      const fresh = defaultData();
+      fresh.password = pw;
+      saveData(fresh);
+      renderAll();
+      toast('已重置', 'info');
+    }
+    function closeModalOutside(e, id) { if (e.target === e.currentTarget) document.getElementById(id).classList.add('hidden'); }
+
+    // ---- Init ----
+    renderAll();
+
+    // File drop visual feedback
+    document.querySelectorAll('.file-drop').forEach(el => {
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
+      el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+    });
+  </script>
+</body>
+</html>
