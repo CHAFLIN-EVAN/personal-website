@@ -6,6 +6,7 @@
   <title>作品集 — 彭一泓</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preload" as="image" href="portfolio-images/1.webp">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0a; color: #e5e5e5; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -23,7 +24,7 @@
     .nav-btn:hover { background: rgba(57,255,20,0.15); color: #39ff14; }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .fade-in { animation: fadeIn 0.3s ease; }
+    .fade-in { animation: fadeIn 0.25s ease; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -42,7 +43,6 @@
   <!-- Main Viewer -->
   <main class="flex-1 pt-14 pb-28 flex items-center justify-center p-4">
     <div class="relative w-full max-w-5xl">
-      <!-- Prev / Next buttons -->
       <button onclick="navigate(-1)" class="nav-btn absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white/70 text-xl">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
@@ -50,9 +50,8 @@
         <i class="fa-solid fa-chevron-right"></i>
       </button>
 
-      <!-- Image -->
       <div class="flex items-center justify-center min-h-[50vh]">
-        <img id="main-image" src="portfolio-images/1.jpg" alt="作品集" class="fade-in max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl" style="box-shadow: 0 0 60px rgba(57,255,20,0.06);">
+        <img id="main-image" src="portfolio-images/1.webp" alt="作品集" class="fade-in max-w-full max-h-[70vh] object-contain rounded-lg" style="box-shadow: 0 0 60px rgba(57,255,20,0.06);">
       </div>
     </div>
   </main>
@@ -66,16 +65,22 @@
   <script>
     const TOTAL = 31;
     let current = 0;
+    const preloaded = new Set([0]);
+
+    function preload(i) {
+      if (i < 0 || i >= TOTAL || preloaded.has(i)) return;
+      preloaded.add(i);
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = `portfolio-images/${i + 1}.webp`;
+      document.head.appendChild(link);
+    }
 
     function navigate(dir) {
-      current = (current + dir + TOTAL) % TOTAL;
-      const img = document.getElementById('main-image');
-      img.classList.remove('fade-in');
-      void img.offsetWidth;
-      img.src = `portfolio-images/${current + 1}.jpg`;
-      img.classList.add('fade-in');
-      document.getElementById('page-indicator').textContent = `${current + 1} / ${TOTAL}`;
-      updateThumbs();
+      const next = (current + dir + TOTAL) % TOTAL;
+      goTo(next);
+      preload(next + dir);
     }
 
     function goTo(n) {
@@ -83,10 +88,12 @@
       const img = document.getElementById('main-image');
       img.classList.remove('fade-in');
       void img.offsetWidth;
-      img.src = `portfolio-images/${current + 1}.jpg`;
+      img.src = `portfolio-images/${n + 1}.webp`;
       img.classList.add('fade-in');
-      document.getElementById('page-indicator').textContent = `${current + 1} / ${TOTAL}`;
+      document.getElementById('page-indicator').textContent = `${n + 1} / ${TOTAL}`;
       updateThumbs();
+      preload(n - 1);
+      preload(n + 1);
     }
 
     function updateThumbs() {
@@ -98,14 +105,12 @@
       });
     }
 
-    // Keyboard navigation
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') navigate(-1);
       if (e.key === 'ArrowRight') navigate(1);
       if (e.key === 'Escape') window.location = 'index.html';
     });
 
-    // Touch swipe
     let touchStartX = 0;
     document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
     document.addEventListener('touchend', e => {
@@ -113,11 +118,12 @@
       if (Math.abs(diff) > 60) navigate(diff > 0 ? 1 : -1);
     });
 
-    // Build thumbnails
+    // Build thumbnails — use tiny versions
     const strip = document.getElementById('thumbnail-strip');
     for (let i = 0; i < TOTAL; i++) {
       const img = document.createElement('img');
-      img.src = `portfolio-images/${i + 1}.jpg`;
+      img.src = `portfolio-images/thumb-${i + 1}.webp`;
+      img.loading = 'lazy';
       img.className = `thumb w-12 h-16 object-cover rounded cursor-pointer flex-shrink-0 ${i === 0 ? 'active' : ''}`;
       img.onclick = () => goTo(i);
       strip.appendChild(img);
