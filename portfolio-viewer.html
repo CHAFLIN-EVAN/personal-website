@@ -898,30 +898,18 @@
       }
     });
 
-    // Ball hover behavior
-    let hoverTimer = null;
-    let leaveTimer = null;
-
+    // Ball hover behavior (only ball slides out, card stays closed)
     detailBall.addEventListener('mouseenter', () => {
       if (!isDraggingBall) {
         detailBall.classList.add('hover-in');
-        clearTimeout(leaveTimer);
-        clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(() => {
-          if (!detailCardOpen) openDetailCard();
-        }, 300);
       }
     });
     detailBall.addEventListener('mouseleave', () => {
-      if (!isDraggingBall && !isDraggingCard) {
-        clearTimeout(hoverTimer);
-        leaveTimer = setTimeout(() => {
-          if (!isDraggingBall && !isDraggingCard && !detailCard.matches(':hover')) {
-            if (detailCardOpen) closeDetailCard();
-            detailBall.classList.remove('hover-in');
-            detailBall.style.left = '-28px';
-          }
-        }, 400);
+      if (!isDraggingBall && !isDraggingCard && !detailCard.matches(':hover')) {
+        if (!detailCardOpen) {
+          detailBall.classList.remove('hover-in');
+          detailBall.style.left = '-28px';
+        }
       }
     });
 
@@ -1026,19 +1014,17 @@
       }
     });
 
-    // Card hover: keep open
+    // Card hover: prevent ball from hiding when cursor moves between ball and card
     detailCard.addEventListener('mouseenter', () => {
-      clearTimeout(leaveTimer);
-      clearTimeout(hoverTimer);
+      detailBall.classList.add('hover-in');
     });
     detailCard.addEventListener('mouseleave', () => {
-      leaveTimer = setTimeout(() => {
-        if (!isDraggingBall && !isDraggingCard && !detailBall.matches(':hover')) {
-          if (detailCardOpen) closeDetailCard();
+      if (!isDraggingBall && !isDraggingCard && !detailBall.matches(':hover')) {
+        if (!detailCardOpen) {
           detailBall.classList.remove('hover-in');
           detailBall.style.left = '-28px';
         }
-      }, 300);
+      }
     });
 
     function toggleDetailCard() {
