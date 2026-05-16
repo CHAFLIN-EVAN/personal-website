@@ -607,22 +607,38 @@
 
       ctx.clearRect(0, 0, cw, ch);
 
-      // ---- Ink-wash mouse interaction ----
+      // ---- Ink-wash mouse interaction + text core repulsion ----
       if (animationDone) {
-        ctx.fillStyle = '#fff';
+        const textCX = cw / 2, textCY = ch / 2;
+        const textRadius = Math.min(cw, ch) * 0.22; // text outline radius
+
         for (const p of particles) {
-          const dx = p.tx - mouseX;
-          const dy = p.ty - mouseY;
-          const dist2 = dx * dx + dy * dy;
+          // Distance from text center
+          const tdx = p.tx - textCX;
+          const tdy = p.ty - textCY;
+          const tdist = Math.sqrt(tdx * tdx + tdy * tdy) || 1;
 
-          // Ink effect: particles disperse like ink from brush stroke
-          const push = Math.exp(-dist2 * 0.0008) * 14;
-          const angle = Math.atan2(dy, dx);
-          p.inkX += (Math.cos(angle) * push - p.inkX) * 0.1;
-          p.inkY += (Math.sin(angle) * push - p.inkY) * 0.1;
-          p.inkA += (1 - Math.exp(-dist2 * 0.0006) * 0.5 - p.inkA) * 0.08;
+          // Mouse ink-wash repulsion
+          const mdx = p.tx - mouseX;
+          const mdy = p.ty - mouseY;
+          const mdist2 = mdx * mdx + mdy * mdy;
+          const mpush = Math.exp(-mdist2 * 0.0008) * 14;
+          const mangle = Math.atan2(mdy, mdx);
 
-          // Rhythmic pulse: each rectangle breathes with its own phase
+          // Text-core repulsion: push particles outward from text center
+          // Stronger near center, fades near text outline
+          const tpush = Math.max(0, 1 - tdist / textRadius) * 3.5;
+          const tnx = tdx / tdist;
+          const tny = tdy / tdist;
+
+          // Combined force
+          const totalPushX = Math.cos(mangle) * mpush + tnx * tpush;
+          const totalPushY = Math.sin(mangle) * mpush + tny * tpush;
+          p.inkX += (totalPushX - p.inkX) * 0.08;
+          p.inkY += (totalPushY - p.inkY) * 0.08;
+          p.inkA += (1 - Math.exp(-mdist2 * 0.0006) * 0.5 - p.inkA) * 0.08;
+
+          // Rhythmic pulse
           const pulse = Math.sin(elapsed * 3.2 + p.phase * 1.7) * 0.3 + 1;
           const pw = p.sw * pulse;
           const ph = p.sh * pulse;
@@ -630,9 +646,24 @@
           const px = p.tx + p.inkX;
           const py = p.ty + p.inkY;
 
+          // Glow: particles near text outline glow neon green
+          const distFromEdge = Math.abs(tdist - textRadius);
+          const glowAlpha = distFromEdge < 55 ? (1 - distFromEdge / 55) * 0.55 : 0;
+
+          if (glowAlpha > 0.08) {
+            ctx.fillStyle = `rgba(57,255,20,${glowAlpha})`;
+            ctx.shadowColor = '#39ff14';
+            ctx.shadowBlur = 10 * (glowAlpha / 0.55);
+          } else {
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+          }
+
           ctx.globalAlpha = p.inkA * 0.5;
           ctx.fillRect(px - pw / 2, py - ph / 2, pw, ph);
         }
+        ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
         requestAnimationFrame(drawSplash);
         return;
@@ -800,40 +831,9 @@
     initCodeRain();
     codeCanvas.classList.add('visible'); // code rain visible from start (behind splash)
 
-    // ---- Text mask for code rain interaction ----
-    let textMaskSet = null;
-    let textBounds = null; // { left, right, top, bottom, step }
-
-    function buildTextMask() {
-      const off = document.createElement('canvas');
-      off.width = codeCanvas.width;
-      off.height = codeCanvas.height;
-      const octx = off.getContext('2d');
-      octx.textAlign = 'center'; octx.textBaseline = 'middle';
-      const fs = Math.floor(Math.min(codeCanvas.width * 0.1, codeCanvas.height * 0.16));
-      octx.font = `900 ${fs}px system-ui, -apple-system, sans-serif`;
-      octx.fillText("EVAN'S PORTFOLIO", codeCanvas.width / 2, codeCanvas.height / 2);
-      const data = octx.getImageData(0, 0, codeCanvas.width, codeCanvas.height).data;
-      const set = new Set();
-      const step = 8;
-      let L = 1/0, R = -1/0, T = 1/0, B = -1/0;
-      for (let y = 0; y < codeCanvas.height; y += step)
-        for (let x = 0; x < codeCanvas.width; x += step)
-          if (data[(y * codeCanvas.width + x) * 4] > 128) {
-            set.add(`${Math.floor(x/step)},${Math.floor(y/step)}`);
-            if (x < L) L = x; if (x > R) R = x;
-            if (y < T) T = y; if (y > B) B = y;
-          }
-      textMaskSet = set;
-      textBounds = { left: L, right: R, top: T, bottom: B, step };
-    }
-
     function drawCodeRain() {
       codeCtx.clearRect(0, 0, codeCanvas.width, codeCanvas.height);
       codeCtx.font = '13px "Courier New", monospace';
-
-      if (!textMaskSet) buildTextMask();
-
       for (const drop of codeRainDrops) {
         drop.y += drop.speed;
         if (drop.y > codeCanvas.height + 20) { drop.y = -drop.chars.length * 12; drop.head = Math.floor(Math.random() * drop.chars.length); }
@@ -842,43 +842,15 @@
           if (y < -10 || y > codeCanvas.height) continue;
           const dist = Math.abs(i - drop.head);
           const a = drop.opacity * (1 - dist / drop.chars.length * 0.7);
-
-          let drawX = drop.x, glow = 0;
-
-          // Text repulsion: push code rain outward from text silhouette
-          if (textBounds && y > textBounds.top - 36 && y < textBounds.bottom + 36 && drawX > textBounds.left - 48 && drawX < textBounds.right + 48) {
-            const s = textBounds.step;
-            const gx = Math.round(drawX / s);
-            const gy = Math.round(y / s);
-            let minD = 99, nearTX = 0;
-            for (let dx = -3; dx <= 3; dx++) {
-              for (let dy = -2; dy <= 2; dy++) {
-                if (textMaskSet.has(`${gx + dx},${gy + dy}`)) {
-                  const d = Math.hypot(drawX - (gx + dx) * s, y - (gy + dy) * s);
-                  if (d < minD) { minD = d; nearTX = (gx + dx) * s; }
-                }
-              }
-            }
-            if (minD < 42) {
-              const push = (1 - minD / 42) * 26;
-              drawX += push * (drawX < nearTX ? -1 : 1);
-              if (minD < 18) glow = 1 - minD / 18;
-            }
-          }
-
-          if (glow > 0) {
-            codeCtx.fillStyle = `rgba(57,255,20,${Math.min(a * 2.5, 0.4) * (0.3 + glow * 0.7)})`;
-          } else {
-            codeCtx.fillStyle = dist < 2 ? `rgba(190,220,255,${a * 1.5})` : `rgba(110,160,220,${a * 0.6})`;
-          }
-          codeCtx.fillText(drop.chars[i], drawX, y);
+          codeCtx.fillStyle = dist < 2 ? `rgba(190,220,255,${a * 1.5})` : `rgba(110,160,220,${a * 0.6})`;
+          codeCtx.fillText(drop.chars[i], drop.x, y);
         }
       }
       requestAnimationFrame(drawCodeRain);
     }
     requestAnimationFrame(drawCodeRain);
 
-    window.addEventListener('resize', () => { codeCanvas.width = window.innerWidth; codeCanvas.height = window.innerHeight; initCodeRain(); textMaskSet = null; });
+    window.addEventListener('resize', () => { codeCanvas.width = window.innerWidth; codeCanvas.height = window.innerHeight; initCodeRain(); });
 
     // ================================================================
     //  SCROLL REVEAL
