@@ -317,9 +317,11 @@
       top: 50%;
       transform: translateY(-50%) scale(0.85);
       z-index: 54;
-      width: 280px;
-      max-height: 420px;
-      background: rgba(14, 14, 14, 0.9);
+      width: calc(25vw - 8px);
+      min-width: 300px;
+      max-width: 480px;
+      max-height: 75vh;
+      background: rgba(14, 14, 14, 0.92);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -383,7 +385,7 @@
     #detail-card-body {
       flex: 1;
       overflow-y: auto;
-      padding: 14px 16px;
+      padding: 20px 22px;
     }
     #detail-card-body::-webkit-scrollbar {
       width: 2px;
@@ -396,23 +398,23 @@
       border-radius: 2px;
     }
     #detail-card-body h4 {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
       color: #e5e5e5;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       line-height: 1.5;
     }
     #detail-card-body .detail-divider {
-      width: 32px;
+      width: 40px;
       height: 2px;
       background: #39ff14;
       opacity: 0.4;
       border-radius: 1px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
     #detail-card-body p {
-      font-size: 12px;
-      line-height: 1.8;
+      font-size: 13px;
+      line-height: 1.85;
       color: rgba(255, 255, 255, 0.5);
     }
     #detail-card-body .detail-label {
@@ -422,27 +424,8 @@
       color: rgba(57, 255, 20, 0.55);
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-top: 10px;
+      margin-top: 12px;
       margin-bottom: 2px;
-    }
-
-    #detail-card-none {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 30px 20px;
-      text-align: center;
-      color: rgba(255, 255, 255, 0.25);
-    }
-    #detail-card-none i {
-      font-size: 28px;
-      margin-bottom: 10px;
-      opacity: 0.3;
-    }
-    #detail-card-none p {
-      font-size: 11px;
-      line-height: 1.5;
     }
   </style>
 </head>
@@ -910,16 +893,45 @@
     });
 
     // Ball hover behavior
+    let hoverTimer = null;
+    let leaveTimer = null;
+
     detailBall.addEventListener('mouseenter', () => {
       if (!isDraggingBall) {
         detailBall.classList.add('hover-in');
+        clearTimeout(leaveTimer);
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => {
+          if (!detailCardOpen) openDetailCard();
+        }, 300);
       }
     });
     detailBall.addEventListener('mouseleave', () => {
-      if (!isDraggingBall && !detailCardOpen) {
-        detailBall.classList.remove('hover-in');
-        detailBall.style.left = '-28px';
+      if (!isDraggingBall) {
+        clearTimeout(hoverTimer);
+        leaveTimer = setTimeout(() => {
+          if (!isDraggingBall && !detailCard.matches(':hover')) {
+            if (detailCardOpen) closeDetailCard();
+            detailBall.classList.remove('hover-in');
+            detailBall.style.left = '-28px';
+          }
+        }, 400);
       }
+    });
+
+    // Card hover: keep open
+    detailCard.addEventListener('mouseenter', () => {
+      clearTimeout(leaveTimer);
+      clearTimeout(hoverTimer);
+    });
+    detailCard.addEventListener('mouseleave', () => {
+      leaveTimer = setTimeout(() => {
+        if (!isDraggingBall && !detailBall.matches(':hover')) {
+          if (detailCardOpen) closeDetailCard();
+          detailBall.classList.remove('hover-in');
+          detailBall.style.left = '-28px';
+        }
+      }, 300);
     });
 
     function toggleDetailCard() {
@@ -934,8 +946,10 @@
       detailCardOpen = true;
       detailCard.classList.add('open');
       detailCard.classList.remove('hidden-card');
-      detailBall.style.left = '8px';
-      detailBall.classList.add('hover-in');
+      if (!detailBall.classList.contains('hover-in')) {
+        detailBall.style.left = '8px';
+        detailBall.classList.add('hover-in');
+      }
       updateDetailCardContent();
     }
 
@@ -943,10 +957,8 @@
       detailCardOpen = false;
       detailCard.classList.remove('open');
       detailCard.classList.add('hidden-card');
-      setTimeout(() => {
-        detailBall.style.left = '-28px';
-        detailBall.classList.remove('hover-in');
-      }, 200);
+      detailBall.classList.remove('hover-in');
+      detailBall.style.left = '-28px';
     }
 
     function updateDetailCardContent() {
@@ -956,12 +968,7 @@
       detailBadge.textContent = '第 ' + (current + 1) + ' 页';
 
       if (!info) {
-        detailCardBody.innerHTML = `
-          <div id="detail-card-none">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <p>本页暂无详细说明<br>（封面、简历、目录与封底不展示详情）</p>
-          </div>
-        `;
+        detailCardBody.innerHTML = '';
       } else {
         detailCardBody.innerHTML = `
           <h4>${info.title}</h4>
