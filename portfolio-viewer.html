@@ -77,16 +77,15 @@
       -webkit-user-drag: none;
     }
 
-    /* Sidebar */
+    /* Right TOC Sidebar */
     #sidebar {
       position: fixed;
       top: 3.5rem;
       right: 0;
       height: calc(100vh - 3.5rem);
       z-index: 45;
-      transform: translateX(320px); /* hides 320px panel, shows 36px handle */
+      transform: translateX(320px);
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
     }
     #sidebar.open {
       transform: translateX(0);
@@ -101,51 +100,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-    }
-
-    #sidebar-handle {
-      width: 36px;
-      min-width: 36px;
-      background: rgba(20, 20, 20, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-right: none;
-      border-radius: 10px 0 0 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 12px;
-      height: 64px;
-      box-shadow: -2px 0 16px rgba(0, 0, 0, 0.5);
-    }
-    #sidebar-handle:hover {
-      background: rgba(57, 255, 20, 0.12);
-      border-color: rgba(57, 255, 20, 0.4);
-      box-shadow: -2px 0 20px rgba(57, 255, 20, 0.08);
-    }
-    #sidebar-handle i {
-      color: rgba(255, 255, 255, 0.65);
-      font-size: 13px;
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    #sidebar-handle span {
-      writing-mode: vertical-rl;
-      font-size: 10px;
-      color: rgba(255, 255, 255, 0.45);
-      letter-spacing: 2px;
-      transition: color 0.3s ease;
-    }
-    #sidebar.open #sidebar-handle i {
-      transform: rotate(180deg);
-    }
-    #sidebar-handle:hover i,
-    #sidebar-handle:hover span {
-      color: #39ff14;
+      height: 100%;
     }
 
     #sidebar-header {
@@ -266,7 +221,6 @@
       color: rgba(57, 255, 20, 0.45);
     }
 
-    /* Overlay */
     #sidebar-overlay {
       position: fixed;
       inset: 0;
@@ -281,11 +235,214 @@
       pointer-events: auto;
     }
 
-    /* Adjust viewer when sidebar open */
     @media (min-width: 1024px) {
       #sidebar.open ~ main {
         margin-right: 320px;
       }
+    }
+
+    /* Left Detail Floating Ball */
+    #detail-ball {
+      position: fixed;
+      left: -28px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 55;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(20, 20, 20, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.3s ease,
+                  border-color 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    #detail-ball:hover,
+    #detail-ball.hover-in {
+      left: 8px;
+      border-color: rgba(57, 255, 20, 0.35);
+      box-shadow: 0 0 28px rgba(57, 255, 20, 0.1);
+    }
+    #detail-ball.dragging {
+      cursor: grabbing;
+      transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.9;
+    }
+    #detail-ball i {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 17px;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    #detail-ball:hover i,
+    #detail-ball.hover-in i {
+      color: #39ff14;
+    }
+    #detail-ball .ball-page {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(10, 10, 10, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 9px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    #detail-ball:hover .ball-page,
+    #detail-ball.hover-in .ball-page {
+      border-color: rgba(57, 255, 20, 0.4);
+      color: #39ff14;
+    }
+
+    /* Detail Card */
+    #detail-card {
+      position: fixed;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%) scale(0.85);
+      z-index: 54;
+      width: 280px;
+      max-height: 420px;
+      background: rgba(14, 14, 14, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease,
+                  transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
+    #detail-card.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(-50%) scale(1);
+    }
+    #detail-card.hidden-card {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-50%) scale(0.85);
+    }
+
+    #detail-card-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #detail-card-header .page-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: #39ff14;
+      background: rgba(57, 255, 20, 0.08);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    #detail-card-close {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-size: 10px;
+    }
+    #detail-card-close:hover {
+      background: rgba(57, 255, 20, 0.1);
+      border-color: rgba(57, 255, 20, 0.3);
+      color: #39ff14;
+    }
+
+    #detail-card-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+    }
+    #detail-card-body::-webkit-scrollbar {
+      width: 2px;
+    }
+    #detail-card-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #detail-card-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 2px;
+    }
+    #detail-card-body h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e5e5;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    #detail-card-body .detail-divider {
+      width: 32px;
+      height: 2px;
+      background: #39ff14;
+      opacity: 0.4;
+      border-radius: 1px;
+      margin-bottom: 10px;
+    }
+    #detail-card-body p {
+      font-size: 12px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    #detail-card-body .detail-label {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(57, 255, 20, 0.55);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      margin-bottom: 2px;
+    }
+
+    #detail-card-none {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.25);
+    }
+    #detail-card-none i {
+      font-size: 28px;
+      margin-bottom: 10px;
+      opacity: 0.3;
+    }
+    #detail-card-none p {
+      font-size: 11px;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -311,12 +468,8 @@
   <!-- Sidebar Overlay -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-  <!-- Sidebar -->
+  <!-- Right TOC Sidebar -->
   <aside id="sidebar">
-    <div id="sidebar-handle" onclick="toggleSidebar()" title="展开目录">
-      <i class="fa-solid fa-chevron-left"></i>
-      <span>目录</span>
-    </div>
     <div id="sidebar-panel">
       <div id="sidebar-header">
         <h3>作品集目录</h3>
@@ -327,6 +480,23 @@
       <div id="sidebar-list"></div>
     </div>
   </aside>
+
+  <!-- Left Detail Ball -->
+  <div id="detail-ball" title="查看详情">
+    <i class="fa-solid fa-circle-info"></i>
+    <div class="ball-page" id="ball-page-num">1</div>
+  </div>
+
+  <!-- Left Detail Card -->
+  <div id="detail-card">
+    <div id="detail-card-header">
+      <span class="page-badge" id="detail-badge">第 1 页</span>
+      <button id="detail-card-close" onclick="toggleDetailCard()" title="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div id="detail-card-body"></div>
+  </div>
 
   <!-- Main Viewer -->
   <main class="flex-1 pt-14 pb-28 flex items-center justify-center p-4">
@@ -413,6 +583,176 @@
       { title: '设计方案呈现', sub: '最终方案展示与设计价值总结' },
     ];
 
+    // Detail content for pages 4-30 (skip 0=cover, 1=CV, 2=TOC, 30=back)
+    const pageDetails = {
+      0: null, 1: null, 2: null, 30: null,
+      3: {
+        title: 'AI 智能服务设计 · 项目概述',
+        context: '本项目聚焦于基于大语言模型的智能服务平台设计，旨在通过AI技术重塑传统服务流程，提升用户体验与服务效率。',
+        content: '从市场调研、用户研究出发，经过竞品分析、服务蓝图规划，最终完成从概念到界面的全链路设计。整体设计遵循以用户为中心的理念，融合AI能力与人性化交互。',
+        highlights: '服务蓝图规划 · 多触点AI交互 · 端到端体验设计'
+      },
+      4: {
+        title: '服务规划与技术架构',
+        context: '在明确项目目标后，对AI服务的整体蓝图进行了系统性规划，定义了核心技术路线与服务模块。',
+        content: '梳理了从用户输入到AI响应的完整服务链路，包括意图识别、上下文管理、多轮对话、结果生成等关键节点。同时规划了服务侧的技术架构，确保可扩展性与稳定性。',
+        highlights: '意图识别流程 · 多轮对话管理 · 可扩展架构设计'
+      },
+      5: {
+        title: '市场趋势与机遇分析',
+        context: '深入研究AI服务市场的宏观趋势与细分赛道，识别产品差异化的切入点。',
+        content: '分析了全球及国内AI服务市场的规模、增速与竞争格局，涵盖了智能客服、AI助手、行业垂直应用等多个方向。通过PEST分析与波特五力模型，明确了市场机遇与潜在风险。',
+        highlights: '百亿级市场洞察 · PEST分析 · 差异化定位策略'
+      },
+      6: {
+        title: '竞品深度分析',
+        context: '针对国内外主流AI服务产品进行系统性对比分析，提炼差异化设计机会。',
+        content: '从功能完整度、交互体验、技术能力、商业模式四个维度对竞品进行拆解。重点关注了ChatGPT、文心一言、通义千问等产品的交互范式与体验优劣，为后续设计决策提供依据。',
+        highlights: '四维度竞品拆解 · 交互范式对比 · 体验优劣研判'
+      },
+      7: {
+        title: '用户研究与画像构建',
+        context: '通过定量问卷与定性访谈相结合的方式，深入理解目标用户群体的特征与需求。',
+        content: '回收有效问卷200+份，深度访谈12位代表性用户。基于数据聚类分析，构建了3类核心用户画像：效率导向型职场人、探索型学生群体、辅助决策型管理者。每类画像涵盖行为特征、使用场景与核心痛点。',
+        highlights: '200+问卷 · 12次深度访谈 · 3类用户画像'
+      },
+      8: {
+        title: '用户体验地图设计',
+        context: '基于用户研究结果，绘制端到端用户体验地图，识别关键服务触点与情感曲线。',
+        content: '覆盖了从发现服务、首次使用、深度使用到持续留存的完整用户旅程。在每个阶段标注了用户行为、情绪波动、痛点与机会点，为后续功能设计提供了清晰的体验优化路径。',
+        highlights: '全旅程触点分析 · 情感曲线追踪 · 体验机会识别'
+      },
+      9: {
+        title: '设计概念与体验策略',
+        context: '将研究成果转化为具体的设计概念，定义核心体验原则与设计策略。',
+        content: '提出了「主动智能、渐进信任、无缝协作」三大体验原则。围绕这些原则，输出了多种设计概念方案，包含交互模式、信息架构与视觉方向，并通过内部评审确定了最优解。',
+        highlights: '三大体验原则 · 多方案概念探索 · 设计策略矩阵'
+      },
+      10: {
+        title: '界面视觉设计（一）',
+        context: '基于确定的设计概念，进行主要功能界面的视觉设计与交互原型制作。',
+        content: '完成了对话界面、历史记录、设置管理、知识库等核心模块的UI设计。采用简洁克制的视觉语言，通过合理的留白、层次分明的信息架构与微妙的动效，营造专业且亲和的AI产品气质。',
+        highlights: '核心模块UI · 交互原型 · 视觉语言定义'
+      },
+      11: {
+        title: '设计细节与规范体系',
+        context: '系统化输出设计规范，涵盖组件库、动效标准与视觉一致性指南。',
+        content: '建立了完整的Design System，包括色彩体系、字体层级、间距系统、图标规范与组件状态（默认/悬停/激活/禁用）。定义了对话气泡、消息反馈、加载状态等AI特有组件的设计标准，确保品牌一致性与开发效率。',
+        highlights: 'Design System · 组件状态矩阵 · AI专属组件规范'
+      },
+      // 项目二：智能系统设计 (12-19)
+      12: {
+        title: '智能决策系统 · 项目概述',
+        context: '本项目面向企业管理场景，设计一款数据驱动的智能决策辅助系统，帮助企业高效处理复杂决策问题。',
+        content: '系统整合多源数据，通过可视化分析与AI算法辅助，将复杂的决策过程变得透明、可追溯。设计核心围绕数据仪表盘、决策工作流与智能推荐三大模块展开。',
+        highlights: '多源数据整合 · AI辅助决策 · 企业级应用设计'
+      },
+      13: {
+        title: '业务需求深度分析',
+        context: '深入客户业务场景，通过工作坊与访谈拆解核心业务需求，定义功能优先级。',
+        content: '组织了多场跨部门需求工作坊，梳理了从数据采集、清洗、分析到决策执行的完整业务流程。使用MoSCoW方法对需求进行优先级排序，明确了MVP范围与后续迭代方向。',
+        highlights: '跨部门工作坊 · MoSCoW优先级 · MVP定义'
+      },
+      14: {
+        title: '系统信息架构设计',
+        context: '基于需求分析结果，设计清晰、可扩展的产品信息架构。',
+        content: '采用卡片分类法对功能模块进行归类和层级划分，构建了从导航结构到页面层级的信息架构体系。确保用户能够以最少的点击完成关键任务，同时为未来功能扩展预留了灵活性。',
+        highlights: '卡片分类法 · 扁平化导航 · 可扩展架构'
+      },
+      15: {
+        title: '核心用户流程设计',
+        context: '聚焦关键业务场景，设计核心操作流程与交互逻辑。',
+        content: '针对数据上传、指标配置、报表生成、决策建议查阅等核心场景，逐一绘制了详细的流程图与交互稿。重点优化了操作效率与错误预防，通过渐进式引导降低复杂系统的学习成本。',
+        highlights: '流程图覆盖 · 操作效率优化 · 渐进式引导'
+      },
+      16: {
+        title: '数据可视化设计',
+        context: '将复杂的业务数据转化为直观、可交互的可视化图表与仪表盘。',
+        content: '根据数据类型与分析目的选择合适的图表类型（趋势图、对比图、分布图、关系图等），设计了多层级的数据下钻与联动筛选能力。色彩方案兼顾数据可读性与品牌视觉统一。',
+        highlights: '多层级下钻 · 联动筛选 · 数据色谱体系'
+      },
+      17: {
+        title: '原型设计与用户验证',
+        context: '从低保真线框图到高保真可交互原型，通过多轮测试验证设计方案。',
+        content: '使用渐进式原型策略：先以线框图快速验证流程合理性，再用高保真原型测试视觉表达与微交互。每轮测试后整理反馈矩阵，驱动设计迭代优化。',
+        highlights: '渐进式原型 · 可用性测试 · 反馈驱动迭代'
+      },
+      18: {
+        title: '完整界面视觉设计',
+        context: '输出系统全部页面的高保真UI设计，确保视觉表现力与品牌一致性。',
+        content: '完成了仪表盘、数据管理、决策中心、报告生成、系统设置等全部模块的视觉设计。界面风格以深色为主调，通过荧光绿点缀与微妙的玻璃态质感，营造专业、科技感十足的企业级产品调性。',
+        highlights: '全模块覆盖 · 深色科技风 · 品牌一致性'
+      },
+      19: {
+        title: '设计交付与开发对接',
+        context: '输出完整的设计标注、组件代码片段与开发规范，确保设计高还原度落地。',
+        content: '使用自动化标注工具输出详细设计参数，提供组件级的CSS变量与交互说明。建立了Design-Dev协作流程，通过设计走查与验收机制确保最终产品与设计稿的高一致性。',
+        highlights: '自动标注 · CSS变量交付 · Design-Dev协作'
+      },
+      // 项目三：移动应用设计 (20-27)
+      20: {
+        title: '生活方式App · 项目概述',
+        context: '面向年轻用户群体的生活方式管理类App，涵盖习惯养成、时间管理与生活记录三大功能模块。',
+        content: '项目从0到1，经历了完整的用户调研、功能定义、交互设计、视觉设计全流程。设计目标是为年轻用户打造一个简洁、有趣、温暖的生活陪伴工具。',
+        highlights: '0到1全流程 · 年轻用户群体 · 温暖陪伴型设计'
+      },
+      21: {
+        title: '用户调研与需求洞察',
+        context: '通过问卷调研、用户访谈与行为数据分析，深入理解年轻用户的生活方式与需求痛点。',
+        content: '调研覆盖了大学生与职场新人两个核心群体，挖掘了他们在时间管理、习惯坚持、生活记录方面的真实痛点。发现用户更倾向于轻量、有仪式感、带社交属性的工具，而非传统的效率软件。',
+        highlights: '双群体调研 · 仪式感需求 · 社交属性偏好'
+      },
+      22: {
+        title: '功能定义与信息架构',
+        context: '基于调研洞察，定义核心功能模块并设计清晰的信息架构。',
+        content: '围绕「记录-追踪-成长」的核心闭环，定义了习惯打卡、时间轴、数据回顾、社区分享等核心功能。采用底部Tab切换的经典导航模式，降低用户认知负担，确保单手操作的便利性。',
+        highlights: '记录追踪成长闭环 · 底部Tab导航 · 单手操作优先'
+      },
+      23: {
+        title: '核心交互流程设计',
+        context: '设计高频场景的交互流程与微交互细节，打磨顺畅自然的操作体验。',
+        content: '重点设计了习惯打卡、添加记录、查看回顾等核心流程的交互细节。通过手势操作（滑动切换、长按编辑、下拉刷新）与细腻的动效反馈，让每一次操作都轻盈愉悦。',
+        highlights: '手势交互体系 · 细腻动效 · 爽感打卡体验'
+      },
+      24: {
+        title: '视觉风格探索',
+        context: '探索App的视觉方向，通过情绪板与风格实验确定最终视觉语言。',
+        content: '实验了多彩活泼、极简留白、温暖复古三种视觉方向，最终选择了融合霓虹点缀与柔和梯度的高反差风格。色彩体系以暗色为底，通过荧光色强调关键操作与数据亮点，营造年轻、个性的视觉感受。',
+        highlights: '三方向风格探索 · 霓虹暖色基调 · 个性视觉语言'
+      },
+      25: {
+        title: '主要界面视觉设计',
+        context: '完成App全部页面的高保真视觉设计，确保统一的品牌调性与高品质的视觉表达。',
+        content: '覆盖了启动页、首页（习惯概览）、打卡详情、时间轴、数据统计、个人中心等全部页面。设计中注重信息的清晰传达与情感温度的平衡，通过插画、图标和色彩细节营造独特的品牌气质。',
+        highlights: '全页面覆盖 · 信息与情感平衡 · 独特品牌气质'
+      },
+      26: {
+        title: '高保真交互原型',
+        context: '制作可交互的高保真原型，用于用户测试与开发沟通。',
+        content: '使用原型工具搭建了包含核心流程的可点击原型，模拟真实使用场景中的页面切换、手势响应与动效表现。原型用于最终用户验证，并根据反馈进行了微调优化。',
+        highlights: '可点击原型 · 真实场景模拟 · 验证驱动的微调'
+      },
+      27: {
+        title: '可用性测试与迭代优化',
+        context: '通过可用性测试发现体验问题，驱动最后一轮设计迭代与优化。',
+        content: '招募了8位目标用户进行可用性测试，设置了5个核心任务场景。通过任务完成率、操作时长与用户反馈三个维度评估体验质量，并针对性优化了2处关键流程卡点。',
+        highlights: '8位用户测试 · 5个任务场景 · 2处关键优化'
+      },
+      // 项目四：服务体验创新 (28-29)
+      28: {
+        title: '服务体验创新 · 项目概述',
+        context: '本项目聚焦线上线下融合的新零售服务场景，通过设计创新重塑从进店到离店的全链路体验。',
+        content: '以用户旅程为线索，梳理了线上预约、到店引导、商品体验、智能推荐、便捷结算、离店关怀等关键触点。在每个触点上探索了数字化与人性化服务的最佳结合方式。',
+        highlights: 'O2O融合 · 全链路触点 · 数字化人性化平衡'
+      },
+      29: {
+        title: '服务蓝图与最终呈现',
+        context: '绘制完整的服务蓝图，明确前台体验与后台支撑的对应关系，并输出最终设计方案。',
+        content: '服务蓝图贯穿了用户行为、前台服务、后台支撑与技术支持四个层面。基于蓝图识别了3个关键服务优化机会，并输出了完整的触点设计方案与交付文档。整体方案兼顾了用户体验提升与商业价值实现。',
+        highlights: '四层服务蓝图 · 3个优化机会 · 体验与商业双赢'
+      }
+    };
+
     // Build sidebar list
     const sidebarList = document.getElementById('sidebar-list');
     const sidebar = document.getElementById('sidebar');
@@ -476,6 +816,171 @@
     });
 
     buildSidebar();
+
+    // Detail ball & card
+    const detailBall = document.getElementById('detail-ball');
+    const detailCard = document.getElementById('detail-card');
+    const detailCardBody = document.getElementById('detail-card-body');
+    const detailBadge = document.getElementById('detail-badge');
+    const ballPageNum = document.getElementById('ball-page-num');
+    let detailCardOpen = false;
+
+    // Ball drag
+    let isDraggingBall = false;
+    let ballDragStartY = 0;
+    let ballStartTop = 0;
+    let hasMoved = false;
+
+    detailBall.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      isDraggingBall = true;
+      hasMoved = false;
+      detailBall.classList.add('dragging');
+      ballDragStartY = e.clientY;
+      ballStartTop = detailBall.getBoundingClientRect().top;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isDraggingBall) return;
+      const dy = e.clientY - ballDragStartY;
+      if (Math.abs(dy) > 3) hasMoved = true;
+      let newTop = ballStartTop + dy;
+      // Clamp within viewport
+      const minY = 80;
+      const maxY = window.innerHeight - 120;
+      newTop = Math.max(minY, Math.min(maxY, newTop));
+      detailBall.style.top = newTop + 'px';
+      detailBall.style.transform = 'translateY(0)';
+      // Also move the card
+      detailCard.style.top = newTop + 'px';
+      detailCard.style.transform = detailCardOpen ? 'translateY(0) scale(1)' : 'translateY(0) scale(0.85)';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDraggingBall) {
+        detailBall.classList.remove('dragging');
+        isDraggingBall = false;
+        // Auto-snap: hide part of ball off-screen after drag
+        setTimeout(() => {
+          if (!isDraggingBall && !detailBall.matches(':hover')) {
+            detailBall.style.left = '-28px';
+            detailBall.classList.remove('hover-in');
+          }
+        }, 1200);
+      }
+    });
+
+    // Touch drag
+    detailBall.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        isDraggingBall = true;
+        hasMoved = false;
+        detailBall.classList.add('dragging');
+        ballDragStartY = e.touches[0].clientY;
+        ballStartTop = detailBall.getBoundingClientRect().top;
+      }
+    });
+
+    window.addEventListener('touchmove', e => {
+      if (!isDraggingBall) return;
+      const dy = e.touches[0].clientY - ballDragStartY;
+      if (Math.abs(dy) > 3) hasMoved = true;
+      let newTop = ballStartTop + dy;
+      const minY = 80;
+      const maxY = window.innerHeight - 120;
+      newTop = Math.max(minY, Math.min(maxY, newTop));
+      detailBall.style.top = newTop + 'px';
+      detailBall.style.transform = 'translateY(0)';
+      detailCard.style.top = newTop + 'px';
+      detailCard.style.transform = detailCardOpen ? 'translateY(0) scale(1)' : 'translateY(0) scale(0.85)';
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      if (isDraggingBall) {
+        detailBall.classList.remove('dragging');
+        isDraggingBall = false;
+        setTimeout(() => {
+          if (!isDraggingBall) {
+            detailBall.style.left = '-28px';
+            detailBall.classList.remove('hover-in');
+          }
+        }, 1200);
+      }
+    });
+
+    // Ball hover behavior
+    detailBall.addEventListener('mouseenter', () => {
+      if (!isDraggingBall) {
+        detailBall.classList.add('hover-in');
+      }
+    });
+    detailBall.addEventListener('mouseleave', () => {
+      if (!isDraggingBall && !detailCardOpen) {
+        detailBall.classList.remove('hover-in');
+        detailBall.style.left = '-28px';
+      }
+    });
+
+    function toggleDetailCard() {
+      if (detailCardOpen) {
+        closeDetailCard();
+      } else {
+        openDetailCard();
+      }
+    }
+
+    function openDetailCard() {
+      detailCardOpen = true;
+      detailCard.classList.add('open');
+      detailCard.classList.remove('hidden-card');
+      detailBall.style.left = '8px';
+      detailBall.classList.add('hover-in');
+      updateDetailCardContent();
+    }
+
+    function closeDetailCard() {
+      detailCardOpen = false;
+      detailCard.classList.remove('open');
+      detailCard.classList.add('hidden-card');
+      setTimeout(() => {
+        detailBall.style.left = '-28px';
+        detailBall.classList.remove('hover-in');
+      }, 200);
+    }
+
+    function updateDetailCardContent() {
+      const info = pageDetails[current];
+      const ballNum = document.getElementById('ball-page-num');
+      ballNum.textContent = current + 1;
+      detailBadge.textContent = '第 ' + (current + 1) + ' 页';
+
+      if (!info) {
+        detailCardBody.innerHTML = `
+          <div id="detail-card-none">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <p>本页暂无详细说明<br>（封面、简历、目录与封底不展示详情）</p>
+          </div>
+        `;
+      } else {
+        detailCardBody.innerHTML = `
+          <h4>${info.title}</h4>
+          <div class="detail-divider"></div>
+          <p>${info.context}</p>
+          <div class="detail-label">具体内容</div>
+          <p>${info.content}</p>
+          <div class="detail-label">设计要点</div>
+          <p>${info.highlights}</p>
+        `;
+      }
+    }
+
+    // Also override toggleDetailCard on the ball to respect click vs drag
+    detailBall.addEventListener('click', e => {
+      if (!hasMoved) {
+        toggleDetailCard();
+      }
+    });
     const preloaded = new Set([0]);
 
     // Zoom state
@@ -656,6 +1161,8 @@
       document.getElementById('page-indicator').textContent = `${n + 1} / ${TOTAL}`;
       updateThumbs();
       syncSidebarActive();
+      updateDetailCardContent();
+      document.getElementById('ball-page-num').textContent = n + 1;
       preload(n - 1);
       preload(n + 1);
     }
@@ -684,7 +1191,11 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowLeft') navigate(-1);
       if (e.key === 'ArrowRight') navigate(1);
-      if (e.key === 'Escape') resetZoom();
+      if (e.key === 'Escape') {
+        if (detailCardOpen) { closeDetailCard(); return; }
+        if (sidebarOpen) { closeSidebar(); return; }
+        resetZoom();
+      }
     });
 
     // Touch swipe (single finger for page turn)
