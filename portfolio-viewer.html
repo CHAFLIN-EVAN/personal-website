@@ -317,14 +317,14 @@
       top: 50%;
       transform: translateY(-50%) scale(0.85);
       z-index: 54;
-      width: calc(25vw - 8px);
-      min-width: 300px;
-      max-width: 480px;
-      max-height: 75vh;
-      background: rgba(14, 14, 14, 0.92);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: calc(37.5vw - 8px);
+      min-width: 420px;
+      max-width: 680px;
+      max-height: 78vh;
+      background: rgba(14, 14, 14, 0.55);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 0;
       opacity: 0;
@@ -334,7 +334,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
     }
     #detail-card.open {
       opacity: 1;
@@ -353,6 +353,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    #detail-card-header:active {
+      cursor: grabbing;
     }
     #detail-card-header .page-badge {
       font-size: 11px;
@@ -907,15 +913,116 @@
       }
     });
     detailBall.addEventListener('mouseleave', () => {
-      if (!isDraggingBall) {
+      if (!isDraggingBall && !isDraggingCard) {
         clearTimeout(hoverTimer);
         leaveTimer = setTimeout(() => {
-          if (!isDraggingBall && !detailCard.matches(':hover')) {
+          if (!isDraggingBall && !isDraggingCard && !detailCard.matches(':hover')) {
             if (detailCardOpen) closeDetailCard();
             detailBall.classList.remove('hover-in');
             detailBall.style.left = '-28px';
           }
         }, 400);
+      }
+    });
+
+    // Card header drag
+    const detailCardHeader = document.getElementById('detail-card-header');
+    let isDraggingCard = false;
+    let cardDragStartX = 0, cardDragStartY = 0;
+    let cardStartLeft = 0, cardStartTop = 0;
+
+    detailCardHeader.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      isDraggingCard = true;
+      hasMoved = false;
+      const rect = detailCard.getBoundingClientRect();
+      cardDragStartX = e.clientX;
+      cardDragStartY = e.clientY;
+      cardStartLeft = rect.left;
+      cardStartTop = rect.top;
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isDraggingCard) return;
+      const dx = e.clientX - cardDragStartX;
+      const dy = e.clientY - cardDragStartY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+      let newLeft = cardStartLeft + dx;
+      let newTop = cardStartTop + dy;
+      // Clamp
+      const minX = -60;
+      const maxX = window.innerWidth - 80;
+      const minY = 80;
+      const maxY = window.innerHeight - 120;
+      newLeft = Math.max(minX, Math.min(maxX, newLeft));
+      newTop = Math.max(minY, Math.min(maxY, newTop));
+      detailCard.style.left = newLeft + 'px';
+      detailCard.style.top = newTop + 'px';
+      detailCard.style.transform = 'translateY(0) scale(1)';
+      // Move ball with card
+      detailBall.style.left = (newLeft - 34) + 'px';
+      detailBall.style.top = newTop + 'px';
+      detailBall.style.transform = 'translateY(0)';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDraggingCard) {
+        isDraggingCard = false;
+        if (!detailBall.matches(':hover') && !detailCard.matches(':hover')) {
+          setTimeout(() => {
+            if (!isDraggingCard && !detailBall.matches(':hover') && !detailCard.matches(':hover')) {
+              detailBall.style.left = '-28px';
+              detailBall.classList.remove('hover-in');
+            }
+          }, 1200);
+        }
+      }
+    });
+
+    // Touch drag for card header
+    detailCardHeader.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        isDraggingCard = true;
+        hasMoved = false;
+        const rect = detailCard.getBoundingClientRect();
+        cardDragStartX = e.touches[0].clientX;
+        cardDragStartY = e.touches[0].clientY;
+        cardStartLeft = rect.left;
+        cardStartTop = rect.top;
+      }
+    });
+
+    window.addEventListener('touchmove', e => {
+      if (!isDraggingCard) return;
+      const dx = e.touches[0].clientX - cardDragStartX;
+      const dy = e.touches[0].clientY - cardDragStartY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+      let newLeft = cardStartLeft + dx;
+      let newTop = cardStartTop + dy;
+      const minX = -60;
+      const maxX = window.innerWidth - 80;
+      const minY = 80;
+      const maxY = window.innerHeight - 120;
+      newLeft = Math.max(minX, Math.min(maxX, newLeft));
+      newTop = Math.max(minY, Math.min(maxY, newTop));
+      detailCard.style.left = newLeft + 'px';
+      detailCard.style.top = newTop + 'px';
+      detailCard.style.transform = 'translateY(0) scale(1)';
+      detailBall.style.left = (newLeft - 34) + 'px';
+      detailBall.style.top = newTop + 'px';
+      detailBall.style.transform = 'translateY(0)';
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      if (isDraggingCard) {
+        isDraggingCard = false;
+        setTimeout(() => {
+          if (!isDraggingCard && !detailBall.matches(':hover') && !detailCard.matches(':hover')) {
+            detailBall.style.left = '-28px';
+            detailBall.classList.remove('hover-in');
+          }
+        }, 1200);
       }
     });
 
@@ -926,7 +1033,7 @@
     });
     detailCard.addEventListener('mouseleave', () => {
       leaveTimer = setTimeout(() => {
-        if (!isDraggingBall && !detailBall.matches(':hover')) {
+        if (!isDraggingBall && !isDraggingCard && !detailBall.matches(':hover')) {
           if (detailCardOpen) closeDetailCard();
           detailBall.classList.remove('hover-in');
           detailBall.style.left = '-28px';
